@@ -30,6 +30,13 @@ def fetch_and_save(ticker: str, period: str, interval: str, out_dir: str = "data
 
         os.makedirs(out_dir, exist_ok=True)
         file_path = os.path.join(out_dir, f"{ticker}_{period}_{interval}.csv")
+        
+        # Do some cleaning before saving the dataset as csv
+        data.reset_index(inplace=True)
+        data.columns = data.columns.droplevel(1)    # Remove the second multi index column
+        data.rename_axis(None, axis=1, inplace=True)    # Drop the "Price" name of the whole index columns
+        data.columns = ['Date', 'Close', 'High', 'Low', 'Open', 'Volume']   # Standarize name of columns
+        data.set_index("Date", inplace=True)
         data.to_csv(file_path)
         print(f"✅ Saved {ticker} data to {file_path}")
 
