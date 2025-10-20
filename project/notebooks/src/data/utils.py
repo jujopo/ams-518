@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
-from scipy.stats import norm, t
+from scipy.stats import norm, t, probplot
 
 def timeframe_selector(data: dict, stocks: list, timeframe: str, freq: str):
     '''
@@ -89,4 +89,34 @@ def generate_histograms(data: pd.DataFrame, stats: dict, num_points=50):
         plt.xlabel('Value')
         plt.ylabel('Density')
         plt.legend()
+        plt.show()
+
+def generate_qq_plots(data: pd.DataFrame):
+    """
+    Generates Normal and Student's t Q-Q plots for each stock ticker in the DataFrame.
+    """
+    for ticker in data.columns:
+        ticker_data = data[ticker].dropna()
+
+        # --- Create a figure with two subplots, side-by-side ---
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        fig.suptitle(f'Q-Q Plots for {ticker}', fontsize=16)
+
+        # --- 1. Normal Q-Q Plot (Left) ---
+        probplot(ticker_data, dist="norm", plot=ax1)
+        ax1.set_title("Normal Distribution Q-Q Plot")
+        ax1.set_xlabel("Theoretical Quantiles (Normal)")
+        ax1.set_ylabel("Sample Quantiles")
+
+        # --- 2. Student's t Q-Q Plot (Right) ---
+        # First, we need to fit the t-distribution to get its parameters
+        df, loc, scale = t.fit(ticker_data)
+        
+        # Now, create the plot using the fitted parameters
+        probplot(ticker_data, dist=t, sparams=(df, loc, scale), plot=ax2)
+        ax2.set_title(f"Student's t-Distribution Q-Q Plot, df = {df}")
+        ax2.set_xlabel("Theoretical Quantiles (Student's t)")
+        ax2.set_ylabel("") # Hide y-label for cleaner look
+
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to make space for suptitle
         plt.show()
