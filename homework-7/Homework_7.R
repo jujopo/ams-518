@@ -2,11 +2,15 @@ library(PSG)
 library(dplyr)
 library(tidyr)
 library(xts)
+library(ggplot2)
 
 setwd("C:/Users/Jujop/Documents/GitHub/ams-518/homework-7/data")
 
 # Set path to Rdata file including the RData file's name with CS:
 load("C:/Users/Jujop/Documents/GitHub/ams-518/homework-7/data/problem_st_dev_risk.RData")
+
+load("C:/Users/Jujop/Documents/GitHub/ams-518/homework-7/data/problem_CVaR2_err_075.RData")
+
 
 # Check what is the current problem statement
 problem.list$problem_statement
@@ -271,6 +275,192 @@ for (n_train in training_sizes) {
 # Final Results
 print("Simulation Complete. Final averaged results:")
 print(results_df)
+
+# Reshape data for ggplot2
+
+# Pivot the data from its wide format (10 metric columns)
+# to a long format (3 columns: SampleType, Factor, CVaR_Deviation)
+results_long <- results_df %>%
+  pivot_longer(
+    cols = -TrainingSize,
+    names_to = "MetricName",
+    values_to = "CVaR_Deviation"
+  ) %>%
+  # Create new columns based on the metric names
+  mutate(
+    SampleType = ifelse(grepl("InSample", MetricName), "In-Sample", "Out-of-Sample"),
+    
+    # Create descriptive labels for each line
+    Factor = case_when(
+      MetricName == "Avg_InSample_2F_f1" ~ "2-Factor (x2)",
+      MetricName == "Avg_InSample_2F_f2" ~ "2-Factor (x3)",
+      MetricName == "Avg_OutOfSample_2F_f1" ~ "2-Factor (x2)",
+      MetricName == "Avg_OutOfSample_2F_f2" ~ "2-Factor (x3)",
+      
+      MetricName == "Avg_InSample_3F_f1" ~ "3-Factor (x1)",
+      MetricName == "Avg_InSample_3F_f2" ~ "3-Factor (x2)",
+      MetricName == "Avg_InSample_3F_f3" ~ "3-Factor (x3)",
+      MetricName == "Avg_OutOfSample_3F_f1" ~ "3-Factor (x1)",
+      MetricName == "Avg_OutOfSample_3F_f2" ~ "3-Factor (x2)",
+      MetricName == "Avg_OutOfSample_3F_f3" ~ "3-Factor (x3)",
+      TRUE ~ MetricName
+    ),
+    
+    # Create a simple "Model" column for grouping
+    Model = ifelse(grepl("2F", MetricName), "2-Factor", "3-Factor")
+  )
+
+# --- 3. Create the plot ---
+# This plot shows all 10 lines, grouped by model and sample type
+ggplot(results_long, 
+       aes(x = TrainingSize, 
+           y = CVaR_Deviation, 
+           color = Factor,          # Color lines by the specific factor
+           linetype = SampleType)) +  # Dash lines by In/Out-of-Sample
+  geom_line(linewidth = 1) +
+  geom_point(size = 2) +
+  
+  # Use 'facet_wrap' to split the plot into two clean charts:
+  # One for the 2-Factor model, one for the 3-Factor model.
+  # This is much easier to read than 10 lines on one chart.
+  facet_wrap(~ Model, scales = "free_y") + 
+  
+  labs(
+    title = "Model Performance vs. Training Set Size",
+    subtitle = "Comparing In-Sample (dashed) and Out-of-Sample (solid) CVaR Deviations",
+    x = "Number of Rows in Training Set",
+    y = "Average CVaR Deviation (0.95)",
+    color = "Factor",
+    linetype = "Sample Type"
+  ) +
+  scale_linetype_manual(values = c("In-Sample" = "dashed", "Out-of-Sample" = "solid")) +
+  theme_minimal() +
+  # Use a color palette that can handle many lines
+  scale_color_brewer(palette = "Paired")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- 2. Reshape data for ggplot2 ---
+# (Assuming 'results_df' is in your environment from the simulation)
+
+# We "pivot" the data from its wide format (10 metric columns)
+# to a long format (several key columns)
+results_long <- results_df %>%
+  pivot_longer(
+    cols = -TrainingSize,
+    names_to = "MetricName",
+    values_to = "CVaR_Deviation"
+  ) %>%
+  # Create new helper columns based on the metric names
+  mutate(
+    SampleType = ifelse(grepl("InSample", MetricName), "In-Sample", "Out-of-Sample"),
+    
+    # Create descriptive labels for each line
+    Factor = case_when(
+      MetricName == "Avg_InSample_2F_f1" ~ "x2 (In-Sample)",
+      MetricName == "Avg_InSample_2F_f2" ~ "x3 (In-Sample)",
+      MetricName == "Avg_OutOfSample_2F_f1" ~ "x2 (Out-of-Sample)",
+      MetricName == "Avg_OutOfSample_2F_f2" ~ "x3 (Out-of-Sample)",
+      
+      MetricName == "Avg_InSample_3F_f1" ~ "x1 (In-Sample)",
+      MetricName == "Avg_InSample_3F_f2" ~ "x2 (In-Sample)",
+      MetricName == "Avg_InSample_3F_f3" ~ "x3 (In-Sample)",
+      MetricName == "Avg_OutOfSample_3F_f1" ~ "x1 (Out-of-Sample)",
+      MetricName == "Avg_OutOfSample_3F_f2" ~ "x2 (Out-of-Sample)",
+      MetricName == "Avg_OutOfSample_3F_f3" ~ "x3 (Out-of-Sample)",
+      TRUE ~ MetricName
+    ),
+    
+    # Create a simple "Model" column for grouping
+    Model = ifelse(grepl("2F", MetricName), "2-Factor Model", "3-Factor Model")
+  )
+
+# --- 3. Create the plot ---
+# This plot shows all 10 lines, but split by model for clarity
+ggplot(results_long, 
+       aes(x = TrainingSize, 
+           y = CVaR_Deviation, 
+           color = Factor,          # Color lines by the specific factor
+           linetype = SampleType)) +  # Dash lines by In/Out-of-Sample
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+  
+  # Use 'facet_wrap' to split the plot into two charts
+  # One for the 2-Factor model, one for the 3-Factor model.
+  facet_wrap(~ Model, scales = "free_y") + 
+  
+  labs(
+    title = "Model Performance vs. Training Set Size",
+    subtitle = "Comparing In-Sample (dashed) and Out-of-Sample (solid) CVaR Deviations",
+    x = "Number of Rows in Training Set (m)",
+    y = "Average CVaR Deviation (Error)",
+    color = "Factor & Sample Type",
+    linetype = "Sample Type"
+  ) +
+  scale_linetype_manual(values = c("In-Sample" = "dashed", "Out-of-Sample" = "solid")) +
+  theme_minimal() +
+  # Use a color palette that can handle many lines
+  scale_color_brewer(palette = "Paired")
+
+# --- 1. Calculate Combined OOS Averages ---
+# (Assuming 'results_df' is in your environment)
+
+# Create a new data frame for this analysis
+analysis_df <- results_df %>%
+  mutate(
+    # Calculate the average OOS deviation for the 2-factor model
+    Avg_OOS_2F_Combined = rowMeans(
+      select(., Avg_OutOfSample_2F_f1, Avg_OutOfSample_2F_f2),
+      na.rm = TRUE
+    ),
+    
+    # Calculate the average OOS deviation for the 3-factor model
+    Avg_OOS_3F_Combined = rowMeans(
+      select(., Avg_OutOfSample_3F_f1, Avg_OutOfSample_3F_f2, Avg_OutOfSample_3F_f3),
+      na.rm = TRUE
+    )
+  )
+
+# --- 2. Find the Break-Even Point ---
+# Find all rows where the 3-factor model's combined OOS deviation
+# is better (lower) than the 2-factor model's.
+break_even_rows <- analysis_df %>%
+  filter(Avg_OOS_3F_Combined < Avg_OOS_2F_Combined)
+
+# --- 3. Report the Result ---
+if (nrow(break_even_rows) > 0) {
+  # Get the *first* training size where this happens
+  break_even_point <- min(break_even_rows$TrainingSize)
+  print(paste(
+    "The break-even point occurs at TrainingSize:", 
+    break_even_point
+  ))
+  print(paste(
+    "This is the first point where the 3-factor model's average OOS CVaR deviation",
+    "becomes lower than the 2-factor model's."
+  ))
+} else {
+  print(paste(
+    "The 3-factor model never outperformed the 2-factor model",
+    "in the tested training size range."
+  ))
+}
+
+# --- 4. (Optional) View the Comparison Table ---
+# This helps you see the numbers yourself
+print("--- Out-of-Sample Average Comparison ---")
+print(select(analysis_df, TrainingSize, Avg_OOS_2F_Combined, Avg_OOS_3F_Combined))
 
 
 
