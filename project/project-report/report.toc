@@ -1,0 +1,25 @@
+\contentsline {section}{\numberline {1}Problem and Model Formulation}{4}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Core problem definition}{4}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Persona models (Stochastic Models)}{4}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Buy \& Hold (BH) model}{4}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}Hedge Fund (HF) model}{5}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}Day Trader (DT) model}{5}{subsubsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.3}Risk Constraints and Performance Metrics}{5}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Index Tracking Model (Optimization Model)}{6}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Approach and Description of Solution Methods}{7}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Data Acquisition and Preparation}{7}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Portfolio Construction and Weighting}{7}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Persona PnL Calculation Methodology}{7}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}BH/HF Daily Return Series}{7}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}DT Strategy Algorithm}{7}{subsubsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.4}Risk Metric Calculation}{7}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Index Tracking Solution Method}{7}{subsection.2.5}%
+\contentsline {section}{\numberline {3}Results: Graphs, Tables, and Calculations}{7}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Persona Performance Analysis}{7}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Index Tracking Results}{7}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Conclusion}{7}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Summary of Findings}{7}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Model Limitations}{7}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Suggestions for Future Work}{7}{subsection.4.3}%
+\contentsline {section}{\numberline {A}Python Code}{8}{appendix.A}%
+\contentsline {section}{\numberline {B}Data Tables}{8}{appendix.B}%

@@ -1,0 +1,235 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc} % Handle input encoding
+\usepackage[T1]{fontenc}    % Font encoding
+\usepackage[margin=1in]{geometry} % Set 1-inch margins
+\usepackage{graphicx}       % For including graphs
+\usepackage{booktabs}       % For professional-looking tables
+\usepackage{amsmath, amsfonts, amssymb, amsthm}       % For math formulas
+\usepackage{hyperref}       % For clickable links (e.g., in ToC)
+\usepackage{fancyhdr}       % For custom headers/footers
+\usepackage[section]{placeins} % Keep figures within their sections
+\usepackage[bottom]{footmisc}
+
+% ---------- PAGE SETUP ----------
+\geometry{
+	top=1in,
+	bottom=1in,
+	left=1in,
+	right=1in
+}
+\linespread{1.2}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+
+
+% --- TITLE PAGE INFORMATION ---
+\title{
+	\vspace{-2cm}
+	\textbf{Equity Performance Project}\\[0.5em]
+	\large \textbf{ Analysis of Investor Personas and Index Tracking} 
+}
+\author{
+	Juan Pérez Osorio \\[0.3em]
+	Department of Applied Mathematics and Statistics, Stony Brook University
+}
+\date{November 2025}
+
+% --- DOCUMENT START ---
+\begin{document}
+	
+	\maketitle % Generates the title page
+	
+	\thispagestyle{empty} % No header/footer on the title page
+	
+	\newpage
+	
+	\tableofcontents % Generates a Table of Contents
+	
+	\newpage
+	
+	% ================================================
+	% 1. PROBLEM FORMULATION
+	% ================================================
+	\section{Problem and Model Formulation}
+	The main objective of this project is to analyze the performance of a specific equity portfolio from the perspectives of three different hypothetical personas. This analysis will be extended to include a formal evaluation of risk-adjusted returns and the construction of an index-tracking portfolio. 
+	
+	\subsection{Core problem definition}
+	% Define the 10-stock portfolio here.
+	The core analysis is centered on a portfolio composed of 10 U.S. stocks, which were selected to represent a mix of technology, dividend aristocrat\footnote{A dividend aristocrat is an S\&P 500 company that has increased its dividend annually for at least 25 years, demonstrating a commitment to returning cash to investors}, and high-dividend yield sectors. The portfolio is defined by
+	\begin{itemize}
+		\item \textbf{Technology:} MSFT, AAPL, IBM
+		\item \textbf{Dividend aristocrat:} XOM, WTM, KO, JNJ
+		\item \textbf{High dividend yield:} VZ, KHC, USB
+	\end{itemize}
+	The performance of this 10-stock target portfolio will be evaluated using historical market data, we assume a specific weighting strategy defined in Section 2. 
+	
+	\subsection{Persona models (Stochastic Models)}
+	The performance of the target portfolio is evaluated through three personas, each representing a different investment horizon and objective. The PnL for each is modeled as a stochastic process dependent on the historical price path of the portfolio's assets.
+	
+	\subsubsection{Buy \& Hold (BH) model}
+	This persona represents a long-term investor who acquires the portfolio at the beginning of the analysis period and holds it until the end.
+	\begin{itemize}
+		\item \textbf{Objective:} Maximize total return over the entire period, inclusive of all cash dividends. 
+		\item \textbf{Model:} The PnL is a single-stage calculation: $\text{PnL}_\text{BH} = \text{Value}_{E} - \text{Value}_{S}$
+	\end{itemize}
+	
+	\subsubsection{Hedge Fund (HF) model}
+	This persona represents an institutional investor that marks-to-market\footnote{Accounting method that values assets and liabilities at their current market price rather than their historical or original cost} and captures PnL changes on a daily basis.
+	\begin{itemize}
+		\item \textbf{Objective:} Generate consistent, positive daily returns (alpha) while managing daily volatility.
+		\item \textbf{Model:} The PnL is a multi-stage stochastic series: $\text{PnL}_{HF}(t) = \text{Value}_t - \text{Value}_{t-1}$ for each day $t$.
+	\end{itemize}
+	
+	\subsubsection{Day Trader (DT) model}
+	This persona represents a short-term speculator who seeks to profit from intraday price movements and holds no overnight positions.
+	\begin{itemize}
+		\item \textbf{Objective:} Achieve positive PnL from a defined intraday trading strategy.
+		\item \textbf{Model:} The PnL is a strategy-dependent daily series, $\text{PnL}_{DT}(t) = PnL_{\text{Strategy}, t}$.
+	\end{itemize}
+	
+	\subsection{Risk Constraints and Performance Metrics}
+	A simple return analysis is insufficient. We introduce risk constraints by evaluating each persona's PnL stream using standard performance metrics.
+	
+	\begin{itemize}
+		\item \textbf{Sharpe Ratio:} Measures risk-adjusted return, defined as:
+		\begin{equation}
+			\text{Sharpe Ratio} = \frac{E[R_p - R_f]}{\sigma_p}
+		\end{equation}
+		where $R_p$ is the portfolio's return, $R_f$ is the risk-free rate, and $\sigma_p$ is the standard deviation (volatility) of the portfolio's excess return.
+		
+		\item \textbf{Value at Risk (VaR):} Defines the maximum expected loss at a given confidence level $1-\alpha$. It is the $1-\alpha$ quantile of the PnL distribution, $F_X(x)$.
+		\begin{equation}
+			\text{VaR}_{\alpha}(X) = - \inf \{x \in \mathbb{R} : F_X(x) > \alpha\}
+		\end{equation}
+		For this project, we will use the non-parametric Historical Simulation method.
+		
+		\item \textbf{Conditional Value at Risk (CVaR):} Measures the expected loss \textit{given} that the loss exceeds the VaR.
+		\begin{equation}
+			\text{CVaR}_{\alpha}(X) = E[-X \mid -X \ge \text{VaR}_{\alpha}(X)]
+		\end{equation}
+	\end{itemize}
+	
+	\subsection{Index Tracking Model (Optimization Model)}
+	This task involves creating a replicating portfolio from a universe of other stocks (e.g., S\&P 500 components excluding the 10 target stocks) to mimic the returns of our target portfolio. This is formulated as a constrained optimization problem.
+	
+	\begin{itemize}
+		\item \textbf{Objective Function:} Minimize the Tracking Error Variance (TEV), which is the variance of the difference between the target portfolio's returns ($R_T$) and the replicating portfolio's returns ($R_R$).
+		\begin{equation}
+			\min_{w} \quad \text{TEV} = E\left[ \left( R_T(t) - R_R(t) \right)^2 \right]
+		\end{equation}
+		where $R_R(t) = \sum_{i=1}^{N} w_i R_i(t)$ and $w_i$ is the weight of stock $i$ in the replicating portfolio.
+		
+		\item \textbf{Constraints:} The optimization is subject to several constraints:
+		\begin{enumerate}
+			\item \textbf{Full Investment:} Weights must sum to one.
+			\begin{equation}
+				\sum_{i=1}^{N} w_i = 1
+			\end{equation}
+			\item \textbf{Long-Only:} No short selling is permitted.
+			\begin{equation}
+				w_i \ge 0 \quad \forall i \in \{1, \dots, N\}
+			\end{equation}
+			\item \textbf{Cardinality Constraint:} The number of stocks in the replicating portfolio must not exceed $k$ (e.g., $k=20$). This is represented using the $L_0$-norm:
+			\begin{equation}
+				\|w\|_0 \le k
+			\end{equation}
+			\item \textbf{Buy-In Constraint:} Any selected stock must have a minimum weight of $l$ (e.g., $l=1\%$). This makes the weights semi-continuous:
+			\begin{equation}
+				w_i \in \{0\} \cup [l, 1] \quad \forall i
+			\end{equation}
+		\end{enumerate}
+	\end{itemize}
+	
+	% ================================================
+	% 2. APPROACH AND METHODS
+	% ================================================
+	\section{Approach and Description of Solution Methods}
+	\subsection{Data Acquisition and Preparation}
+	% Describe yfinance, data cleaning, etc.
+	
+	\subsection{Portfolio Construction and Weighting}
+	% Describe your weighting strategy (e.g., equal-weighted).
+	
+	\subsection{Persona PnL Calculation Methodology}
+	\subsubsection{BH/HF Daily Return Series}
+	\subsubsection{DT Strategy Algorithm}
+	
+	\subsection{Risk Metric Calculation}
+	% Describe the method (e.g., Historical Simulation VaR).
+	
+	\subsection{Index Tracking Solution Method}
+	% Describe the optimizer used (e.g., SciPy).
+	
+	% ================================================
+	% 3. RESULTS AND ANALYSIS
+	% ================================================
+	\section{Results: Graphs, Tables, and Calculations}
+	\subsection{Persona Performance Analysis}
+	% Insert tables and graphs here
+	% \begin{table}[h!]
+		%     \centering
+		%     \caption{Summary of Persona Performance Metrics}
+		%     \label{tab:persona_summary}
+		%     \begin{tabular}{lccc}
+			%         \toprule
+			%         Metric & BH Persona & HF Persona & DT Persona \\
+			%         \midrule
+			%         Total Return (\%) & ... & ... & ... \\
+			%         Sharpe Ratio    & ... & ... & ... \\
+			%         99\% Daily VaR  & ... & ... & ... \\
+			%         99\% Daily CVaR & ... & ... & ... \\
+			%         \bottomrule
+			%     \end{tabular}
+		% \end{table}
+	
+	% \begin{figure}[h!]
+		%     \centering
+		%     % \includegraphics[width=0.8\textwidth]{your_graph_file.png}
+		%     \caption{Cumulative Returns of BH/HF Portfolio}
+		%     \label{fig:bh_returns}
+		% \end{figure}
+	
+	\subsection{Index Tracking Results}
+	% Insert tables and graphs here
+	% \begin{figure}[h!]
+		%     \centering
+		%     % \includegraphics[width=0.8\textwidth]{tracking_graph.png}
+		%     \caption{Target Portfolio vs. Replicating Portfolio Returns}
+		%     \label{fig:tracking_returns}
+		% \end{figure}
+	
+	% ================================================
+	% 4. CONCLUSION
+	% ================================================
+	\section{Conclusion}
+	\subsection{Summary of Findings}
+	\subsection{Model Limitations}
+	\subsection{Suggestions for Future Work}
+	
+	\newpage
+	
+	% ================================================
+	% 5. APPENDICES
+	% ================================================
+	\appendix % Starts the Appendix section
+	\section{Python Code}
+	\label{app:code}
+	% \lstset{language=Python, basicstyle=\footnotesize\ttfamily, breaklines=true}
+	% \lstinputlisting{your_script.py}
+	% Or just paste it in a \verbatim environment if you don't use listings
+	\begin{verbatim}
+		# Paste your Python code here
+		import yfinance as yf
+		import pandas as pd
+		
+		# ...
+	\end{verbatim}
+	
+	\section{Data Tables}
+	\label{app:data}
+	% You can put supplementary data tables here.
+	
+\end{document}
+% --- DOCUMENT END ---
