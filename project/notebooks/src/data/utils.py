@@ -63,7 +63,7 @@ def descriptive_statistics(data: pd.DataFrame):
     
     return statistics
 
-def generate_histograms(data: pd.DataFrame, stats: dict, num_points=50):
+def generate_histograms(data: pd.DataFrame, stats: dict, num_points=50, figsize=(8, 4), dpi=100):
     for ticker in data.columns:
         std = stats[f'{ticker}']['std'] # Extract std
         sigma = std ** 2                # Compute variance
@@ -78,7 +78,7 @@ def generate_histograms(data: pd.DataFrame, stats: dict, num_points=50):
         t_dist = t.pdf(x_range, *params)
             
         # Plot the histogram, the normal fit and the t fit
-        plt.figure(figsize=(9,4), dpi=200)
+        plt.figure(figsize=figsize, dpi=dpi)
         plt.hist(data[f'{ticker}'], bins=40, edgecolor='black', density=True, 
                  range=(stats[f'{ticker}']['min'], stats[f'{ticker}']['max']))
         plt.plot(x_range, pdf_values, color='black', linewidth=2, 
@@ -89,6 +89,70 @@ def generate_histograms(data: pd.DataFrame, stats: dict, num_points=50):
         plt.xlabel('Value')
         plt.ylabel('Density')
         plt.legend()
+        plt.show()
+        
+def generate_histograms_with_residuals(data: pd.DataFrame, num_points=50, figsize=(10, 8)) :
+    for ticker in data.columns:
+        ticker_data = data[ticker].dropna()
+        
+        # Create a figure with two subplots, stacked vertically
+        # sharex=True links the x-axis of both plots for easier comparison
+        fig, ax = plt.subplots(
+            2, 1, 
+            figsize=figsize, 
+            sharex=True, 
+            gridspec_kw={'height_ratios': [3, 1]} # Make the top plot taller
+        )
+
+        # Top plot
+        
+        # Get the histogram data (bar heights and bin edges)
+        # We need these values to calculate the residuals later
+        counts, bin_edges, _ = ax[0].hist(
+            ticker_data, 
+            bins=num_points, 
+            density=True, 
+            edgecolor='black', 
+            alpha=0.6, 
+            label='Daily Returns'
+        )
+        
+        # Calculate the center of each histogram bin for plotting
+        bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+
+        # Fit and plot the Normal distribution
+        mean, std_dev = norm.fit(ticker_data)
+        normal_pdf = norm.pdf(bin_centers, mean, std_dev)
+        ax[0].plot(bin_centers, normal_pdf, 'orange', linewidth=2, label='Normal Distribution Fit')
+
+        # Fit and plot student's t distribution
+        df, loc, scale = t.fit(ticker_data)
+        t_pdf = t.pdf(bin_centers, df, loc, scale)
+        ax[0].plot(bin_centers, t_pdf, 'r--', linewidth=2, label="Student's t-Distribution Fit")
+
+        ax[0].set_title(f'Distribution and Residuals for {ticker}')
+        ax[0].set_ylabel("Probability Density")
+        ax[0].legend()
+        
+        # Bottom plot: residuals
+
+        # Calculate the residuals
+        normal_residuals = counts - normal_pdf
+        t_residuals = counts - t_pdf
+
+        # Plot the residuals as bars
+        bar_width = bin_edges[1] - bin_edges[0]
+        ax[1].bar(bin_centers, normal_residuals, width=bar_width, alpha=0.6, label='Normal Fit Residuals')
+        ax[1].bar(bin_centers, t_residuals, width=bar_width, alpha=0.6, label="Student's t Residuals")
+        
+        # Add a horizontal line at zero for reference
+        ax[1].axhline(0, color='black', linestyle='--')
+
+        ax[1].set_xlabel("Daily Returns")
+        ax[1].set_ylabel("Residual (Actual - Fit)")
+        ax[1].legend()
+
+        plt.tight_layout() # Adjusts plot to prevent labels from overlapping
         plt.show()
 
 def generate_qq_plots(data: pd.DataFrame):
