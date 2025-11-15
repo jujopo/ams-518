@@ -1,8 +1,10 @@
+import requests
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats
 from scipy.stats import norm, t, probplot
+from datetime import datetime, timedelta
 
 def timeframe_selector(data: dict, stocks: list, timeframe: str, freq: str):
     '''
@@ -184,3 +186,54 @@ def generate_qq_plots(data: pd.DataFrame):
 
         plt.tight_layout(rect=[0, 0.03, 1, 0.95]) # Adjust layout to make space for suptitle
         plt.show()
+        
+def get_historical_market_cap(api_key, symbol, start_date=None, end_date=None):
+        """
+        Extract historical market capitalization for a given stock symbol
+        
+        Args:
+            symbol (str): Stock ticker symbol (e.g., 'AAPL', 'GOOGL')
+            start_date (str): Start date in 'YYYY-MM-DD' format (optional)
+            end_date (str): End date in 'YYYY-MM-DD' format (optional)
+        """
+        
+        # If no dates provided, get last 30 days
+        if not end_date:
+            end_date = datetime.now().strftime('%Y-%m-%d')
+        if not start_date:
+            start_date = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        
+        # Endpoint for historical market cap
+        url = f"https://financialmodelingprep.com/stable/historical-market-capitalization?symbol={symbol}"
+        
+        params = {
+            'from': start_date,
+            'to': end_date,
+            'apikey': api_key
+        }
+        
+        try:
+            response = requests.get(url, params=params)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if not data:
+                print(f"No data found for {symbol}")
+                return None
+            
+            # Convert to DataFrame
+            df = pd.DataFrame(data)
+            
+            # Convert date and format market cap
+            df['date'] = pd.to_datetime(df['date'])
+            df['marketCap'] = pd.to_numeric(df['marketCap'])
+            
+            # Sort by date
+            df = df.sort_values('date')
+            
+            return df
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
+            return None
