@@ -237,3 +237,67 @@ def get_historical_market_cap(api_key, symbol, start_date=None, end_date=None):
         except requests.exceptions.RequestException as e:
             print(f"Error fetching data: {e}")
             return None
+        
+def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> dict:
+    """
+    Calculates key performance metrics for a given portfolio.
+    
+    Args:
+    weights (np.array): Series of asset weights (N x 1)
+    returns (pd.DataFrame): DataFrame of assets returns (T x N)
+    daily_rf_rate (pd.DataFrame): DataFrame of daily risk free rate DTB3 (T x 1)
+    timeframe (tuple): Tuple containing the start and end date of the analysis
+    
+    Returns:
+    dict: A dictionary containing the wealth series and key metrics.
+    """
+    # Timeframe window
+    start_date = timeframe[0]
+    end_date = timeframe[1]
+    
+    # Isolate the desired return data
+    stock_returns = returns.loc[start_date:end_date]
+
+    # Calculate portfolio returns
+    portfolio_ret = stock_returns @ weights
+    portfolio_ret = pd.DataFrame(portfolio_ret, columns=['return'])
+
+    # Calculate Wealth index
+    wealth_index = (1 + portfolio_ret).cumprod()
+
+    # Merge datasets aligning them by date
+    portfolio_rf = pd.merge(portfolio_ret,
+         daily_rf_rate,
+         right_on='observation_date',
+         how='inner',
+         left_index=True)
+    
+    # Excess returns
+    portfolio_rf['excess_ret'] = portfolio_rf['return'] - portfolio_rf['risk_free']
+    excess_returns = portfolio_rf['excess_ret']
+
+    # Calculate annualized sharpe ratio from excess returns
+    mean_excess_return = excess_returns.mean()
+    std_excess_return = excess_returns.std()
+
+    # Avoid division by zero if std is 0
+    if std_excess_return == 0:
+        annualized_sharpe = 0.0
+    else:
+        daily_sharpe = mean_excess_return / std_excess_return
+        annualized_sharpe = daily_sharpe * np.sqrt(252)
+     
+    # Calculate Max Drawdown
+    running_peak = wealth_index.cummax()
+    drawdown = (wealth_index - running_peak) / running_peak
+    max_drawdown = drawdown.min()
+
+    return ({
+        "wealth": wealth_index,
+        "total_return": wealth_index.iloc[-1] - 1,
+        "annualized_sharpe": annualized_sharpe,
+        "drawdown": drawdown,
+        "max_drawdown": max_drawdown,
+        "portfolio_daily_returns": portfolio_ret
+    }, portfolio_rf)
+    

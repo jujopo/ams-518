@@ -152,6 +152,33 @@
 	\subsection{Portfolio Construction and Weighting}
 	% Describe your weighting strategy (e.g., equal-weighted).
 	
+	\subsection{Weighting Methodologies and Concentration Risk Mitigation}
+	
+	A critical challenge in constructing the Buy \& Hold portfolio was the significant disparity in market capitalization among the selected assets. The portfolio includes ``Mega-Cap'' technology firms (e.g., AAPL, MSFT) alongside smaller, albeit substantial, High Dividend Yield companies (e.g., KHC, USB).
+	
+	\subsubsection{The Concentration Risk Problem}
+	Standard market capitalization weighting allocates capital proportional to the total value of the firm:
+	\begin{equation}
+		w_i = \frac{M_i}{\sum_{j=1}^{N} M_j}
+	\end{equation}
+	where $M_i$ is the market capitalization of asset $i$. Due to the extreme skewness in the size of the selected assets (where the largest firms are nearly two orders of magnitude larger than the smallest), a standard capitalization strategy results in a hyper-concentrated portfolio. In such a scenario, the idiosyncratic risk and return of the smaller assets become mathematically negligible, effectively negating the benefits of diversification.
+	
+	\subsubsection{Proposed Solution: Logarithmic Market Cap Weighting}
+	To maintain a size-biased allocation strategy while mitigating concentration risk, we implemented a \textit{Logarithmic Market Cap Weighting} scheme. This method dampens the impact of extreme outliers by weighting assets based on the natural logarithm of their market capitalization:
+	\begin{equation}
+		w_i = \frac{\ln(M_i)}{\sum_{j=1}^{N} \ln(M_j)}
+	\end{equation}
+	This transformation preserves the ordinal rank of the assets (larger companies still receive higher weights) but drastically compresses the spread between the largest and smallest allocations. This ensures that the ``Mega-Cap'' stocks influence the portfolio without dominating it, allowing the dividend yield characteristics of the smaller firms to contribute to the total return.
+	
+	\subsubsection{Alternative Risk Constraint: Inverse Volatility Weighting}
+	In addition to size-based strategies, we implemented an \textit{Inverse Volatility} strategy to address the project's risk constraints. This approach allocates capital inversely proportional to the asset's historical standard deviation ($\sigma_i$):
+	\begin{equation}
+		w_i = \frac{1/\sigma_i}{\sum_{j=1}^{N} (1/\sigma_j)}
+	\end{equation}
+	This effectively creates a ``Risk Parity'' portfolio where less volatile assets (typically the Dividend Aristocrats in this selection) receive higher allocations, thereby smoothing the equity curve and potentially improving the Sharpe Ratio.
+	
+	
+	
 	\subsection{Persona PnL Calculation Methodology}
 	\subsubsection{BH/HF Daily Return Series}
 	\subsubsection{DT Strategy Algorithm}
