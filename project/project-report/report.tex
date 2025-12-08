@@ -323,7 +323,7 @@
 	
 	Table \ref{tbl:log_weights} shows the weights of the logarithmic market cap strategy, as we can see, this weighting strategy is very similar to the equally weighted one. 
 	
-	\begin{table}
+	\begin{table}[h]
 		\centering
 		\begin{tabular}{lc}
 			\toprule
@@ -362,43 +362,117 @@
 		\item \textbf{Disadvantages:} Can underperform during strong bull markets driven by high-beta growth stocks; assumes historical volatility predicts future risk.
 	\end{itemize}
 	
+	For this weighting strategy we decided not to show the graph because it yields very similar weights than the equally weighted one, see Table \ref{tbl:invvol_weights} for reference. We can see that some of the less volatile stocks such as KHC and USB are receiving almost the same weights or more than AAPL and MSFT. 
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{lc}
+			\toprule
+			& weights $w_i$ \\
+			\midrule
+			AAPL & 0.119 \\
+			MSFT & 0.110 \\
+			IBM & 0.100 \\
+			XOM & 0.114 \\
+			WTM & 0.095 \\
+			KO & 0.073 \\
+			JNJ & 0.075 \\
+			VZ & 0.080 \\
+			KHC & 0.110 \\
+			USB & 0.123 \\
+			\bottomrule
+		\end{tabular}
+		\caption{Inverse volatility weights}
+		\label{tbl:invvol_weights}
+	\end{table}
+	
 	\subsubsection{Geometric Rank Weighting (Paper Method)}
-	Following the methodology proposed in \textit{Benchmarking Personalized Investing} (Schachter, 2025), we generated weights using a geometric progression parameter $r$ (set to $r=1.15$). Stocks are assigned weights based on their rank index $k$ (where $k=0$ is the highest rank).
-	\begin{equation}
-		w_k = \frac{r^{N-1-k}}{\sum_{j=0}^{N-1} r^{j}}
-	\end{equation}
+	Following the methodology proposed in \textit{Benchmarking Personalized Investing} (Schachter, 2025), we generated weights using a geometric progression parameter $r$ (set to $r=0.8$).
+	
+	\begin{quote}
+		An algorithm that produces ranking is to have the $\{w_i\}$ be a monotonic decreasing function of the stock choices, i.e., $w_2 < w_1$, $w_3 < w_2$, ... For illustration is assumed the weights be based on a geometric series $\{s_i\}$
+		$$s_i = ar^{i-1}$$
+		Where $a>0$, $r<1$. The familiar result of the sum is
+		$$\sum_{i=1}^{N} s_i = a \frac{1-r^N}{1-r}$$
+		Now, a convenient choice of normalization is 
+		$$w_i = \frac{s_i}{\sum_i s_i}$$
+		which simplifies to
+		$$w_i = \frac{r^{i-1}(1-r)}{1-r^N}$$
+		which is notably independent of $a$.
+	\end{quote}
+	
+	
 	\begin{itemize}
-		\item \textbf{Advantages:} Provides a parameterized way to test the ``skill'' of asset allocation. By generating a fixed set of weights and permuting their assignment across assets (see Section 2.5), we can statistically isolate the skill of the investor from the random luck of the weighting distribution.
+		\item \textbf{Advantages:} Provides a parameterized way to test the ``skill'' of asset allocation. By generating a fixed set of weights and permuting their assignment across assets, we can statistically isolate the skill of the investor from the random luck of the weighting distribution.
 		\item \textbf{Disadvantages:} The choice of parameter $r$ is subjective; higher $r$ values lead to aggressive concentration.
 	\end{itemize}
 	
+	Table \ref{tbl:geo0.8_weights} shows the geometric generated weights for $r=0.8$
 	
-	\subsection{Weighting Methodologies and Concentration Risk Mitigation}
-	\label{Weighting}
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{lr}
+			\toprule
+			& weights $w_i$ \\
+			\midrule
+			AAPL & 0.224 \\
+			MSFT & 0.179 \\
+			IBM & 0.143 \\
+			XOM & 0.115 \\
+			WTM & 0.092 \\
+			KO & 0.073 \\
+			JNJ & 0.059 \\
+			VZ & 0.047 \\
+			KHC & 0.038 \\
+			USB & 0.030 \\
+			\bottomrule
+		\end{tabular}
+		\caption{Geometric weights for $r=0.8$}
+		\label{tbl:geo0.8_weights}
+	\end{table}
 	
-	A critical challenge in constructing the Buy \& Hold portfolio was the significant disparity in market capitalization among the selected assets. The portfolio includes ``Mega-Cap'' technology firms (e.g., AAPL, MSFT) alongside smaller, albeit substantial, High Dividend Yield companies (e.g., KHC, USB).
+	Figure \ref{im:geo_weighted} represents the evolution of wealth over time for this geometrically weighted strategy, we can see that the sharpe ratio for this weighting strategy is better than the benchmark. Total return and maximum drawdown are also displayed. 
 	
-	\subsubsection{The Concentration Risk Problem}
-	Standard market capitalization weighting allocates capital proportional to the total value of the firm:
-	\begin{equation}
-		w_i = \frac{M_i}{\sum_{j=1}^{N} M_j}
-	\end{equation}
-	where $M_i$ is the market capitalization of asset $i$. Due to the extreme skewness in the size of the selected assets (where the largest firms are nearly two orders of magnitude larger than the smallest), a standard capitalization strategy results in a hyper-concentrated portfolio. In such a scenario, the idiosyncratic risk and return of the smaller assets become mathematically negligible, effectively negating the benefits of diversification.
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{wealth_geo.png}
+		\caption{Wealth series for the geometrically weighted portfolio}
+		\label{im:geo_weighted}
+	\end{figure}
 	
-	\subsubsection{Proposed Solution: Logarithmic Market Cap Weighting}
-	To maintain a size-biased allocation strategy while mitigating concentration risk, we implemented a \textit{Logarithmic Market Cap Weighting} scheme. This method dampens the impact of extreme outliers by weighting assets based on the natural logarithm of their market capitalization:
-	\begin{equation}
-		w_i = \frac{\ln(M_i)}{\sum_{j=1}^{N} \ln(M_j)}
-	\end{equation}
-	This transformation preserves the ordinal rank of the assets (larger companies still receive higher weights) but drastically compresses the spread between the largest and smallest allocations. This ensures that the ``Mega-Cap'' stocks influence the portfolio without dominating it, allowing the dividend yield characteristics of the smaller firms to contribute to the total return.
+	\paragraph{Comparing multiple values for $r$.} We conducted an anaysis to see the wealth evolution of the portfolio over time depending on the value of $r$ that was initially chosen to generate the weights, we can see the results in Table \ref{tbl:multiple_geo} and Figure \ref{im:multiple_geo}, as we can see, when $r=1$ we obtain the same portfolio as the equally weighed one, and when $r \to 0.5$, we concentrate the majority of the weights in the first stocks. 
 	
-	\subsubsection{Alternative Risk Constraint: Inverse Volatility Weighting}
-	In addition to size-based strategies, we implemented an \textit{Inverse Volatility} strategy to address the project's risk constraints. This approach allocates capital inversely proportional to the asset's historical standard deviation ($\sigma_i$):
-	\begin{equation}
-		w_i = \frac{1/\sigma_i}{\sum_{j=1}^{N} (1/\sigma_j)}
-	\end{equation}
-	This effectively creates a ``Risk Parity'' portfolio where less volatile assets (typically the Dividend Aristocrats in this selection) receive higher allocations, thereby smoothing the equity curve and potentially improving the Sharpe Ratio.
+	\begin{table}
+		\centering
+		\begin{tabular}{lcccccc}
+			\toprule
+			& \multicolumn{6}{c}{weights $w_i (r)$} \\
+			\midrule
+			& 0.5 & 0.6 & 0.7 & 0.8 & 0.9 & 1.0 \\
+			\midrule
+			AAPL & 0.500 & 0.402 & 0.309 & 0.224 & 0.154 & 0.100 \\
+			MSFT & 0.250 & 0.241 & 0.216 & 0.179 & 0.138 & 0.100 \\
+			IBM & 0.125 & 0.145 & 0.151 & 0.143 & 0.124 & 0.100 \\
+			XOM & 0.063 & 0.087 & 0.106 & 0.115 & 0.112 & 0.100 \\
+			WTM & 0.031 & 0.052 & 0.074 & 0.092 & 0.101 & 0.100 \\
+			KO & 0.016 & 0.031 & 0.052 & 0.073 & 0.091 & 0.100 \\
+			JNJ & 0.008 & 0.019 & 0.036 & 0.059 & 0.082 & 0.100 \\
+			VZ & 0.004 & 0.011 & 0.025 & 0.047 & 0.073 & 0.100 \\
+			KHC & 0.002 & 0.007 & 0.018 & 0.038 & 0.066 & 0.100 \\
+			USB & 0.001 & 0.004 & 0.012 & 0.030 & 0.059 & 0.100 \\
+			\bottomrule
+		\end{tabular}
+		\caption{Geometrically generated weights for muliple $r$ values}
+		\label{tbl:multiple_geo}
+	\end{table}
 	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{multiple_geo.png}
+		\caption{Wealth series for multiple geometrically weighted portfolios}
+		\label{im:multiple_geo}
+	\end{figure}
+		
 	
 	
 	\subsection{Persona PnL Calculation Methodology}
