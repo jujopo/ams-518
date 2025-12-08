@@ -11,7 +11,7 @@
 \usepackage{fancyhdr}       % For custom headers/footers
 \usepackage[section]{placeins} % Keep figures within their sections
 \usepackage[bottom]{footmisc}
-
+\usepackage{graphicx}
 % ---------- PAGE SETUP ----------
 \geometry{
 	top=1in,
@@ -22,6 +22,8 @@
 \linespread{1.2}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1em}
+
+\graphicspath{{C:/Users/Jujop/Documents/GitHub/ams-518/project/data/images/}}
 
 
 % --- TITLE PAGE INFORMATION ---
@@ -49,11 +51,18 @@
 	
 	\newpage
 	
+	\section{Introduction}
+	
+	
+	Modern portfolio theory (MPT), or mean-variance analysis, is a mathematical framework for assembling a portfolio of assets such that the expected return is maximized for a given level of risk. It is a formalization and extension of diversification in investing, the idea that owning different kinds of financial assets is less risky than owning only one type. Its key insight is that an asset's risk and return should not be assessed by itself, but by how it contributes to a portfolio's overall risk and return. The variance of return (or its transformation, the standard deviation) is used as a measure of risk, because it is tractable when assets are combined into portfolios.
+	
+	
 	% ================================================
 	% 1. PROBLEM FORMULATION
 	% ================================================
 	\section{Problem and Model Formulation}
-	The main objective of this project is to analyze the performance of a specific equity portfolio from the perspectives of three different hypothetical personas. This analysis will be extended to include a formal evaluation of risk-adjusted returns and the construction of an index-tracking portfolio. 
+	
+	The main objective of this project is to analyze the performance of a specific equity portfolio from the perspectives of two different hypothetical personas. This analysis will be extended to include a formal evaluation of risk-adjusted returns and the construction of an index-tracking portfolio. 
 	
 	\subsection{Core problem definition}
 	% Define the 10-stock portfolio here.
@@ -63,43 +72,43 @@
 		\item \textbf{Dividend aristocrat:} XOM, WTM, KO, JNJ
 		\item \textbf{High dividend yield:} VZ, KHC, USB
 	\end{itemize}
-	The performance of this 10-stock target portfolio will be evaluated using historical market data, we assume a specific weighting strategy defined in Section 2. 
+	The performance of this 10-stock target portfolio will be evaluated using historical market data, we assume a specific weighting strategy defined in Section \ref{Weighting}. 
 	
 	\subsection{Persona models (Stochastic Models)}
-	The performance of the target portfolio is evaluated through three personas, each representing a different investment horizon and objective. The PnL for each is modeled as a stochastic process dependent on the historical price path of the portfolio's assets.
+	The performance of the target portfolio is evaluated through two personas, each representing a different investment horizon and objective. The P\&L for each is modeled as a stochastic process dependent on the historical price path of the portfolio's assets.
 	
 	\subsubsection{Buy \& Hold (BH) model}
 	This persona represents a long-term investor who acquires the portfolio at the beginning of the analysis period and holds it until the end.
 	\begin{itemize}
 		\item \textbf{Objective:} Maximize total return over the entire period, inclusive of all cash dividends. 
-		\item \textbf{Model:} The PnL is a single-stage calculation: $\text{PnL}_\text{BH} = \text{Value}_{E} - \text{Value}_{S}$
+		\item \textbf{Model:} The P\&L is a single-stage calculation: $\text{P\&L}_\text{BH} = \text{Value}_{E} - \text{Value}_{S}$
 	\end{itemize}
 	
 	\subsubsection{Hedge Fund (HF) model}
-	This persona represents an institutional investor that marks-to-market\footnote{Accounting method that values assets and liabilities at their current market price rather than their historical or original cost} and captures PnL changes on a daily basis.
+	This persona represents an institutional investor that marks-to-market\footnote{Accounting method that values assets and liabilities at their current market price rather than their historical or original cost} and captures P\&L changes on a daily basis.
 	\begin{itemize}
-		\item \textbf{Objective:} Generate consistent, positive daily returns (alpha) while managing daily volatility.
-		\item \textbf{Model:} The PnL is a multi-stage stochastic series: $\text{PnL}_{HF}(t) = \text{Value}_t - \text{Value}_{t-1}$ for each day $t$.
+		\item \textbf{Objective:} Generate consistent, positive daily returns (\textit{alpha}) while managing daily volatility.
+		\item \textbf{Model:} The PnL is a multi-stage stochastic series: $\text{P\&L}_{HF}(t) = \text{Value}_t - \text{Value}_{t-1}$ for each day $t$.
 	\end{itemize}
 	
-	\subsubsection{Day Trader (DT) model}
-	This persona represents a short-term speculator who seeks to profit from intraday price movements and holds no overnight positions.
-	\begin{itemize}
-		\item \textbf{Objective:} Achieve positive PnL from a defined intraday trading strategy.
-		\item \textbf{Model:} The PnL is a strategy-dependent daily series, $\text{PnL}_{DT}(t) = PnL_{\text{Strategy}, t}$.
-	\end{itemize}
+%	\subsubsection{Day Trader (DT) model}
+%	This persona represents a short-term speculator who seeks to profit from intraday price movements and holds no overnight positions.
+%	\begin{itemize}
+%		\item \textbf{Objective:} Achieve positive P\&L from a defined intraday trading strategy.
+%		\item \textbf{Model:} The P\&L is a strategy-dependent daily series, $\text{P\&L}_{DT}(t) = PnL_{\text{Strategy}, t}$.
+%	\end{itemize}
 	
 	\subsection{Risk Constraints and Performance Metrics}
-	A simple return analysis is insufficient. We introduce risk constraints by evaluating each persona's PnL stream using standard performance metrics.
+	A simple return analysis is insufficient. We introduce risk constraints by evaluating each persona's P\&L stream using standard performance metrics.
 	
 	\begin{itemize}
 		\item \textbf{Sharpe Ratio:} Measures risk-adjusted return, defined as:
 		\begin{equation}
-			\text{Sharpe Ratio} = \frac{E[R_p - R_f]}{\sigma_p}
+			\text{Sharpe Ratio} = \frac{\mathbb{E}[R_p - R_f]}{\sigma_p}
 		\end{equation}
 		where $R_p$ is the portfolio's return, $R_f$ is the risk-free rate, and $\sigma_p$ is the standard deviation (volatility) of the portfolio's excess return.
 		
-		\item \textbf{Value at Risk (VaR):} Defines the maximum expected loss at a given confidence level $1-\alpha$. It is the $1-\alpha$ quantile of the PnL distribution, $F_X(x)$.
+		\item \textbf{Value at Risk (VaR):} Defines the maximum expected loss at a given confidence level $1-\alpha$. It is the $1-\alpha$ quantile of the P\&L distribution, $F_X(x)$.
 		\begin{equation}
 			\text{VaR}_{\alpha}(X) = - \inf \{x \in \mathbb{R} : F_X(x) > \alpha\}
 		\end{equation}
@@ -107,7 +116,7 @@
 		
 		\item \textbf{Conditional Value at Risk (CVaR):} Measures the expected loss \textit{given} that the loss exceeds the VaR.
 		\begin{equation}
-			\text{CVaR}_{\alpha}(X) = E[-X \mid -X \ge \text{VaR}_{\alpha}(X)]
+			\text{CVaR}_{\alpha}(X) = \mathbb{E}[-X \mid -X \ge \text{VaR}_{\alpha}(X)]
 		\end{equation}
 	\end{itemize}
 	
@@ -146,13 +155,226 @@
 	% 2. APPROACH AND METHODS
 	% ================================================
 	\section{Approach and Description of Solution Methods}
+	
 	\subsection{Data Acquisition and Preparation}
-	% Describe yfinance, data cleaning, etc.
+	
+	The first stage of the project consisted of collecting historical price data for the selected U.S. equities over a multi-year horizon.  
+	Following the project requirements, we used a data window ranging from one to ten years, depending on the specific analysis.  
+	Historical prices, dividends, and corporate‐action–adjusted series were obtained using the \texttt{yfinance} Python package, which provides a simple interface to query the Yahoo Finance API.
+	
+	\paragraph{Data Download.}
+	A dedicated Python script, \texttt{fetch\_prices.py}, was developed to automate the extraction of price data across multiple tickers.  
+	The script supports lists of tickers, allowing batch downloads across arbitrary time horizons and sampling intervals.
+	\begin{verbatim}
+		python fetch_prices.py --tickers AAPL MSFT TSLA --period 5y --interval 1d
+	\end{verbatim}
+	\vspace{-6mm}
+	Data were downloaded using the parameters:
+	\begin{itemize}
+		\item \textbf{Period:} from 1 year to 10 years of lookback;
+		\item \textbf{Interval:} daily data (\texttt{1d}), with optional support for intraday data (\texttt{1m}, \texttt{5m}, \texttt{1h}) for day-trading and high–frequency analysis;
+		\item \textbf{Price adjustment:} the \texttt{auto\_adjust=True} option was used to obtain series corrected for dividends, stock splits, and other corporate actions.
+	\end{itemize}
+	
+	The script stores all downloaded data in a structured directory system under \texttt{data/raw/}, ensuring reproducibility and transparency.  
+	To maintain consistency across analyses, the script also standardizes filenames according to ticker, period, and interval.
+	
+	
+	\paragraph{Limitations of Intraday Data Availability.}
+	During the collection of the data, we faced an important limitation related to the use of \texttt{yfinance} API for intraday data. Yahoo Finance restricts the amount of historical data available at different frequencies, which affects the analysis involving intraday strategies such as the day trader persona. We specifically observed the following constraints:
+	
+	\begin{itemize}
+		\item \texttt{1-minute} data: available only for the last \(\approx 8\) days,
+		\item \texttt{5-minute} data: limited to the last \(\approx 60\) days,
+		\item \texttt{1-hour} data: available for roughly the last \(\approx 730\) days,
+		\item daily data: no meaningful historical limitation.
+	\end{itemize}
+	
+	These restrictions mean that long-horizon intraday performance cannot be analyzed directly using Yahoo Finance. As a result, intraday analysis in this project is necessarily constrained to shorter windows unless alternative data providers (such as Polygon.io, Intrinio, or Tiingo) are used. Daily-frequency data, however, are not subject to these limitations and were therefore used as the primary source for long-term event window, volatility, and persona-level analyses.
+	
+	\paragraph{Data Cleaning.}
+	After acquisition, all datasets were inspected and cleaned inside the Jupyter notebook \texttt{00\_data\_collection.ipynb}.  
+	The cleaning process included:
+	\begin{itemize}
+		\item removing duplicate observations;
+		\item parsing timestamps and enforcing a consistent \texttt{DateTimeIndex};
+		\item forward–filling and backward–filling missing entries due to holidays or API irregularities;
+		\item verifying the integrity of open-high-low-close-volume (OHLCV) structures.
+	\end{itemize}
+	
+	Cleaned datasets were saved in \texttt{data/processed/} for downstream analysis.  
+	We decided to separate \texttt{raw} and \texttt{processed} directories to ensure a more organized and manageable workflow for further analysis.
+	
+	In Figure \ref{im:some_stocks} we can observe a sample of some cleaned data for the specified period and frequency. 
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=1\linewidth]{some_cleaned_1.png}
+		\caption{Price series for selected stocks given a window period and a frequency of data.}
+		\label{im:some_stocks}
+	\end{figure}
+	
+	\paragraph{Return Construction.}
+	Daily log and simple percentage returns were computed from the adjusted closing prices.  
+	These return series provide the foundation for subsequent analyses including:
+	\begin{itemize}
+		\item volatility estimation,
+		\item crisis–period subsetting,
+		\item descriptive statistics (mean, standard deviation, skewness, kurtosis),
+		\item rolling volatility and regime identification.
+	\end{itemize}
 	
 	\subsection{Portfolio Construction and Weighting}
-	% Describe your weighting strategy (e.g., equal-weighted).
+	
+	To evaluate the performance of the target portfolio under different structural assumptions, we implemented five distinct weighting methodologies. Each method addresses specific risks—such as concentration or volatility—and reflects a different investment philosophy. 
+	
+	For each weighting methodology we show the wealth time series and some risk metrics associated with the weighting strategy used. At the end of this section we show a comparison between all weighting strategies. The analysis time frame for the hedge fund and buy and hold personas was defined to be from 2015-10-15 to 2025-10-01.
+	
+	\subsubsection{Benchmark}
+	
+	To compare the effects of different weighting strategies we need a benchmark. We decided to take the S\&P500 index as the benchmark and we ran the same analysis, deriving the VaR, CVaR and the other risk and performance metrics.
+	
+	In Figure \ref{im:sp500} we can see the evolution of wealth over time of our benchmark portfolio; total return, maximum drawdown and other risk metrics are also displayed. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{sp500_wealth.png}
+		\caption{Wealth series for the SP500 index}
+		\label{im:sp500}
+	\end{figure}
+	
+	
+	\subsubsection{Equal Weighting (Naïve Diversification)}
+	The baseline approach assigns an identical allocation to every asset in the portfolio, regardless of size or risk profile.
+	\begin{equation}
+		w_i = \frac{1}{N} \quad \forall i \in \{1, \dots, N\}
+	\end{equation}
+	where $N$ is the number of selected equities.  
+	
+	\begin{itemize}
+		\item \textbf{Advantages:} Maximizes diversification breadth; mathematically simple; avoids concentration risk and simplifies interpretation of portfolio-level metrics.
+		\item \textbf{Disadvantages:} Ignores the economic reality of firm size (treating Kraft Heinz as equal to Apple); requires frequent rebalancing to maintain $1/N$ weights as prices drift.
+	\end{itemize}
+	
+	In Figure \ref{im:equally_weighted} we can see the evolution of wealth over time, we also note that the sharpe ratio obtained is not the most desirable one. Total return and maximum drawdown are also displayed. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{wealth_equally.png}
+		\caption{Wealth series for the equally weighted portfolio}
+		\label{im:equally_weighted}
+	\end{figure}
+	
+	\subsubsection{Standard Market Capitalization Weighting}
+	This method allocates capital proportional to the total market value ($M_i$) of each firm, reflecting the standard index construction (e.g., S\&P 500).
+	\begin{equation}
+		w_i = \frac{M_i}{\sum_{j=1}^{N} M_j}
+	\end{equation}
+	\begin{itemize}
+		\item \textbf{Advantages:} Momentum-based (winners get larger weights); theoretically efficient in the CAPM framework; low turnover.
+		\item \textbf{Disadvantages:} \textbf{Extreme concentration risk.} In our specific portfolio, the ``Mega-Caps'' (MSFT, AAPL) are two orders of magnitude larger than the smallest firms. This results in the top 2 stocks dictating over 80\% of the portfolio's performance, rendering the diversification into the other 8 assets mathematically negligible. See table \ref{tab:mkt_cap}
+	\end{itemize}
+	
+	\begin{table}[h]
+		\centering
+		\begin{tabular}{lc}
+			\toprule
+			& weights $w_i$ \\
+			\midrule
+			AAPL & 0.431 \\
+			MSFT & 0.374 \\
+			IBM & 0.030 \\
+			XOM & 0.052 \\
+			WTM & 0.001 \\
+			KO & 0.031 \\
+			JNJ & 0.051 \\
+			VZ & 0.018 \\
+			KHC & 0.003 \\
+			USB & 0.008 \\
+			\bottomrule
+		\end{tabular}
+		\caption{Market cap weights}
+		\label{tab:mkt_cap}
+	\end{table}
+	
+	Figure \ref{im:mktcap_weighted} represents the evolution of wealth over time for this market cap weighted strategy, we can see that the sharpe ratio for this weighting strategy is in the good/adequate range. Total return and maximum drawdown are also displayed. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{wealth_mktcap.png}
+		\caption{Wealth series for the market cap weighted portfolio}
+		\label{im:mktcap_weighted}
+	\end{figure}
+	
+	\subsubsection{Logarithmic Market Capitalization Weighting}
+	To address the skewness problem identified in the standard market cap approach, we implemented a smoothing function using natural logarithms. This compresses the scale: logarithms drastically shrink the difference between huge numbers. For example, a \$3 trillion company ($3 \times 10^{12}$) has a log value of $\approx 28.7$. A \$100 billion company ($1 \times 10^{11}$) has a log value of $\approx 25.3$.
+	
+	The \$3T company is 30x bigger in real dollars, but only ~1.13x bigger in "log-weight" terms. This preserves the hierarchy (bigger is still heavier) but ensures the smaller stocks get a meaningful allocation.
+	
+	\begin{equation}
+		w_i = \frac{\ln(M_i)}{\sum_{j=1}^{N} \ln(M_j)}
+	\end{equation}
+	\begin{itemize}
+		\item \textbf{Advantages:} Preserves the ordinal rank of size (larger companies still get more weight) but drastically compresses the spread. This allows the ``Mega-Caps'' to lead without dominating, ensuring the dividend aristocrats and high yield stocks have a meaningful impact on total return.
+		\item \textbf{Disadvantages:} Heuristic in nature; effectively overweights smaller companies relative to the broad market.
+	\end{itemize}
+	
+	Figure \ref{im:log_mktcap_weighted} represents the evolution of wealth over time for this logarithmic market cap weighted strategy, we can see that the sharpe ratio for this weighting strategy is better than the benchmark. Total return and maximum drawdown are also displayed. 
+	
+	Table \ref{tbl:log_weights} shows the weights of the logarithmic market cap strategy, as we can see, this weighting strategy is very similar to the equally weighted one. 
+	
+	\begin{table}
+		\centering
+		\begin{tabular}{lc}
+			\toprule
+			& weights $w_i$ \\
+			\midrule
+			AAPL & 0.111 \\
+			MSFT & 0.110 \\
+			IBM & 0.101 \\
+			XOM & 0.103 \\
+			WTM & 0.085 \\
+			KO & 0.101 \\
+			JNJ & 0.103 \\
+			VZ & 0.099 \\
+			KHC & 0.092 \\
+			USB & 0.096 \\
+			\bottomrule
+		\end{tabular}
+		\caption{Logarithmic market cap weights}
+		\label{tbl:log_weights}
+	\end{table}
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1\linewidth]{wealth_log_mktcap.png}
+		\caption{Wealth series for the logarithmic market cap weighted portfolio}
+		\label{im:log_mktcap_weighted}
+	\end{figure}
+	
+	\subsubsection{Inverse Volatility Weighting (Risk Parity)}
+	This risk-aware strategy allocates capital based on the stability of the asset. Weights are inversely proportional to the asset's historical annualized standard deviation ($\sigma_i$).
+	\begin{equation}
+		w_i = \frac{1/\sigma_i}{\sum_{j=1}^{N} (1/\sigma_j)}
+	\end{equation}
+	\begin{itemize}
+		\item \textbf{Advantages:} Penalizes high-volatility tech stocks and rewards stable dividend payers (e.g., KO, JNJ). This typically results in a smoother equity curve and a higher Sharpe Ratio.
+		\item \textbf{Disadvantages:} Can underperform during strong bull markets driven by high-beta growth stocks; assumes historical volatility predicts future risk.
+	\end{itemize}
+	
+	\subsubsection{Geometric Rank Weighting (Paper Method)}
+	Following the methodology proposed in \textit{Benchmarking Personalized Investing} (Schachter, 2025), we generated weights using a geometric progression parameter $r$ (set to $r=1.15$). Stocks are assigned weights based on their rank index $k$ (where $k=0$ is the highest rank).
+	\begin{equation}
+		w_k = \frac{r^{N-1-k}}{\sum_{j=0}^{N-1} r^{j}}
+	\end{equation}
+	\begin{itemize}
+		\item \textbf{Advantages:} Provides a parameterized way to test the ``skill'' of asset allocation. By generating a fixed set of weights and permuting their assignment across assets (see Section 2.5), we can statistically isolate the skill of the investor from the random luck of the weighting distribution.
+		\item \textbf{Disadvantages:} The choice of parameter $r$ is subjective; higher $r$ values lead to aggressive concentration.
+	\end{itemize}
+	
 	
 	\subsection{Weighting Methodologies and Concentration Risk Mitigation}
+	\label{Weighting}
 	
 	A critical challenge in constructing the Buy \& Hold portfolio was the significant disparity in market capitalization among the selected assets. The portfolio includes ``Mega-Cap'' technology firms (e.g., AAPL, MSFT) alongside smaller, albeit substantial, High Dividend Yield companies (e.g., KHC, USB).
 	

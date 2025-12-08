@@ -291,6 +291,11 @@ def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate:
     running_peak = wealth_index.cummax()
     drawdown = (wealth_index - running_peak) / running_peak
     max_drawdown = drawdown.min()
+    
+    # VaR and CVaR (95% Confidence)
+    confidence_level = 0.05
+    var_95 = np.percentile(portfolio_ret, confidence_level * 100)
+    cvar_95 = portfolio_ret[portfolio_ret <= var_95].mean()
 
     return ({
         "wealth": wealth_index,
@@ -298,6 +303,74 @@ def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate:
         "annualized_sharpe": annualized_sharpe,
         "drawdown": drawdown,
         "max_drawdown": max_drawdown,
-        "portfolio_daily_returns": portfolio_ret
+        "portfolio_daily_returns": portfolio_ret,
+        "var_95": var_95,
+        "cvar_95": cvar_95
+    }, portfolio_rf)
+    
+def performance_metrics_index(returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> dict:
+    """
+    Calculates key performance metrics for a given portfolio.
+    
+    Args:
+    returns (pd.DataFrame): DataFrame of assets returns (T x N)
+    daily_rf_rate (pd.DataFrame): DataFrame of daily risk free rate DTB3 (T x 1)
+    timeframe (tuple): Tuple containing the start and end date of the analysis
+    
+    Returns:
+    dict: A dictionary containing the wealth series and key metrics.
+    """
+    # Timeframe window
+    start_date = timeframe[0]
+    end_date = timeframe[1]
+    
+    # Isolate the desired return data
+    index_returns = returns.loc[start_date:end_date]
+    index_returns = pd.DataFrame(index_returns)
+    index_returns.columns = ['return']
+
+    # Calculate Wealth index
+    wealth_index = (1 + index_returns).cumprod()
+
+    # Merge datasets aligning them by date
+    portfolio_rf = pd.merge(index_returns,
+         daily_rf_rate,
+         right_on='observation_date',
+         how='inner',
+         left_index=True)
+    
+    # Excess returns
+    portfolio_rf['excess_ret'] = portfolio_rf['return'] - portfolio_rf['risk_free']
+    excess_returns = portfolio_rf['excess_ret']
+
+    # Calculate annualized sharpe ratio from excess returns
+    mean_excess_return = excess_returns.mean()
+    std_excess_return = excess_returns.std()
+
+    # Avoid division by zero if std is 0
+    if std_excess_return == 0:
+        annualized_sharpe = 0.0
+    else:
+        daily_sharpe = mean_excess_return / std_excess_return
+        annualized_sharpe = daily_sharpe * np.sqrt(252)
+     
+    # Calculate Max Drawdown
+    running_peak = wealth_index.cummax()
+    drawdown = (wealth_index - running_peak) / running_peak
+    max_drawdown = drawdown.min()
+    
+    # VaR and CVaR (95% Confidence)
+    confidence_level = 0.05
+    var_95 = np.percentile(index_returns, confidence_level * 100)
+    cvar_95 = index_returns[index_returns <= var_95].mean()
+
+    return ({
+        "wealth": wealth_index,
+        "total_return": wealth_index.iloc[-1] - 1,
+        "annualized_sharpe": annualized_sharpe,
+        "drawdown": drawdown,
+        "max_drawdown": max_drawdown,
+        "var_95": var_95,
+        "cvar_95": cvar_95
     }, portfolio_rf)
     
