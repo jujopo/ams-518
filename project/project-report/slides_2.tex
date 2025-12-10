@@ -1,0 +1,129 @@
+\documentclass{beamer}
+
+% --- THEME + COLORS ---
+\usetheme{Madrid} % clean and minimal
+
+% Custom soft orange / cream palette
+\definecolor{softorange}{RGB}{240,173,78}
+\definecolor{cream}{RGB}{252,247,239}
+\definecolor{darkgrey}{RGB}{45,45,45}
+
+\setbeamercolor{structure}{fg=softorange}
+\setbeamercolor{title}{fg=white, bg=softorange}
+\setbeamercolor{frametitle}{fg=darkgrey}
+\setbeamercolor{background canvas}{bg=cream}
+
+% --- PACKAGES ---
+\usepackage{amsmath, amsfonts, amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+% --- TITLE PAGE ---
+\title[Equity Performance Project]{Equity Performance Project \\ \large Analysis of Investor Personas and Index Tracking}
+\author{Juan Pérez Osorio}
+\institute{Department of Applied Mathematics and Statistics \\ Stony Brook University}
+\date{November 2025}
+
+\begin{document}
+	
+	% --- TITLE SLIDE ---
+	\begin{frame}
+		\titlepage
+	\end{frame}
+	
+	% --- MOTIVATION ---
+	\begin{frame}{Motivation}
+		\begin{itemize}
+			\item Modern Portfolio Theory provides a framework for risk–return tradeoffs.
+			\item We evaluate a 10-stock equity portfolio under two investor personas.
+			\item Risk metrics: Sharpe Ratio, VaR, CVaR, volatility decomposition.
+		\end{itemize}
+	\end{frame}
+	
+	% --- PORTFOLIO ---
+	\begin{frame}{Portfolio Description}
+		\textbf{10-Stock Portfolio:}
+		\begin{itemize}
+			\item Technology: MSFT, AAPL, IBM
+			\item Dividend Aristocrats: XOM, WTM, KO, JNJ
+			\item High Dividend Yield: VZ, KHC, USB
+		\end{itemize}
+	\end{frame}
+	
+	% --- PERSONAS ---
+	\begin{frame}{Investor Personas}
+		\textbf{Buy \& Hold (BH):}
+		\begin{itemize}
+			\item Long-term investor, single wealth trajectory.
+			\item P\&L: \( \text{Value}_E - \text{Value}_S \)
+		\end{itemize}
+		
+		\vspace{4mm}
+		
+		\textbf{Hedge Fund (HF):}
+		\begin{itemize}
+			\item Daily mark-to-market.
+			\item P\&L series: \( \text{Value}_t - \text{Value}_{t-1} \)
+		\end{itemize}
+	\end{frame}
+	
+	% --- RISK METRICS ---
+	\begin{frame}{Risk and Performance Metrics}
+		\begin{itemize}
+			\item Sharpe Ratio
+			\item Value at Risk (Historical Simulation)
+			\item Conditional Value at Risk
+			\item Volatility estimation and rolling windows
+		\end{itemize}
+	\end{frame}
+	
+	% --- WEIGHTING METHODS ---
+	\begin{frame}{Weighting Methodologies}
+		\begin{itemize}
+			\item Equal Weighting
+			\item Market Capitalization Weighting
+			\item Logarithmic Market Cap Weighting
+		\end{itemize}
+	\end{frame}
+	
+	% --- INDEX TRACKING ---
+	\begin{frame}{Index Tracking Optimization}
+		\textbf{Objective:} Minimize Tracking Error Variance:
+		\[
+		\min_w \; \mathbb{E}[(R_T - R_R)^2]
+		\]
+		\textbf{Constraints:}
+		\begin{itemize}
+			\item Full investment: \( \sum w_i = 1 \)
+			\item Long-only: \( w_i \ge 0 \)
+			\item Cardinality: \( \|w\|_0 \le k \)
+			\item Buy-in threshold: \( w_i \in \{0\} \cup [l,1] \)
+		\end{itemize}
+	\end{frame}
+	
+	% --- RESULTS SUMMARY ---
+	\begin{frame}{Summary of Findings}
+		\begin{itemize}
+			\item Market-cap weighting delivered high returns but extreme concentration.
+			\item Equal weighting provided stable diversification but lower risk-adjusted returns.
+			\item Log-market-cap weighting offered a balanced alternative.
+			\item Index tracking achieved low tracking error under practical constraints.
+		\end{itemize}
+	\end{frame}
+	
+	% --- CONCLUSIONS ---
+	\begin{frame}{Conclusions}
+		\begin{itemize}
+			\item Investor objectives strongly influence optimal portfolio design.
+			\item Weighting choices drive concentration, turnover, and performance.
+			\item Optimization frameworks enable realistic index replication.
+		\end{itemize}
+	\end{frame}
+	
+	% --- END ---
+	\begin{frame}
+		\centering \Large Thank you!
+	\end{frame}
+	
+\end{document}

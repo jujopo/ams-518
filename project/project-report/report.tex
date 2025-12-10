@@ -51,6 +51,13 @@
 	
 	\newpage
 	
+	\begin{abstract}
+		This project analyzes the performance of a diversified equity portfolio through two distinct investor personas—a Buy \& Hold investor and a Hedge Fund–style daily mark-to-market investor—using a decade of historical market data. The study evaluates risk-adjusted returns, drawdowns, and distributional properties of P\&L streams under multiple weighting methodologies, including equal weighting, market capitalization weighting, geometrically weighting, and logarithmic market capitalization weighting. In addition, the project develops an index-tracking model designed to replicate the performance of the 10-stock target portfolio using a subset of S\&P 500 constituents, constrained by cardinality and minimum position size requirements.
+		
+		Data were collected using the \texttt{yfinance} API and processed to generate return series, volatility estimates, and risk metrics such as Sharpe Ratio, Value at Risk (VaR), and Conditional VaR (CVaR). The results highlight the trade-offs between concentration risk, diversification, portfolio turnover, and tracking accuracy. The findings illustrate how portfolio construction techniques and investor objectives critically shape realized performance and downside risk.
+	\end{abstract}
+	
+	
 	\section{Introduction}
 	
 	
@@ -106,7 +113,7 @@
 		\begin{equation}
 			\text{Sharpe Ratio} = \frac{\mathbb{E}[R_p - R_f]}{\sigma[R_p - R_f]}
 		\end{equation}
-		where $R_p$ is the portfolio's return, $R_f$ is the risk-free rate, and $\sigma_p$ is the standard deviation (volatility) of the portfolio's excess return.
+		where $R_p$ is the portfolio's return, $R_f$ is the risk-free rate, and $\sigma_p := \sigma[R_p - R_f]$ is the standard deviation (volatility) of the portfolio's excess return.
 		
 		\item \textbf{Value at Risk (VaR):} Defines the maximum expected loss at a given confidence level $1-\alpha$. It is the $1-\alpha$ quantile of the P\&L distribution, $F_X(x)$.
 		\begin{equation}
@@ -671,12 +678,12 @@
 	
 	\subsection{Empirical Performance}
 	
-	On the top 10 S\&P 500 constituents (2015--2025), the strategy delivers:
+	On our portfolio constituents (2015--2025), the strategy delivers:
 	
 	\begin{center}
 		\begin{tabular}{lcc}
 			\toprule
-			Metric & Strategy & Buy-and-Hold (EW) \\
+			Metric & Strategy & Benchmark (BH S\&P500) \\
 			\midrule
 			Annualized Return   & 14.2\% & 12.8\% \\
 			Annualized Volatility & 10.0\% & 18.5\% \\
@@ -687,59 +694,133 @@
 		\end{tabular}
 	\end{center}
 	
-	These results confirm that combining residual momentum, sector neutralization, volatility scaling, and frequent rebalancing, and volatility targeting produces a dramatically superior risk-adjusted profile compared to naive momentum implementations.	
+	These results confirm that combining residual momentum, sector neutralization, volatility scaling, and frequent rebalancing, and volatility targeting produces a superior risk-adjusted profile compared to naive momentum implementations.		
 		
 	
 	\section{Index Tracking Implementation}
-	% Describe the optimizer used (e.g., SciPy).
+	Finally, we try to replicate our portfolio returns, considering the most reasonable weighting strategy, i.e., the geometrically weighted one with $r=0.8$. We consider that our portfolio returns is an index that we want to replicate by buying other stocks within the S\&P500 universe. 
 	
-	% ================================================
-	% 3. RESULTS AND ANALYSIS
-	% ================================================
-	\section{Results: Graphs, Tables, and Calculations}
-	\subsection{Persona Performance Analysis}
-	% Insert tables and graphs here
-	% \begin{table}[h!]
-		%     \centering
-		%     \caption{Summary of Persona Performance Metrics}
-		%     \label{tab:persona_summary}
-		%     \begin{tabular}{lccc}
-			%         \toprule
-			%         Metric & BH Persona & HF Persona & DT Persona \\
-			%         \midrule
-			%         Total Return (\%) & ... & ... & ... \\
-			%         Sharpe Ratio    & ... & ... & ... \\
-			%         99\% Daily VaR  & ... & ... & ... \\
-			%         99\% Daily CVaR & ... & ... & ... \\
-			%         \bottomrule
-			%     \end{tabular}
-		% \end{table}
+	We define our optimization problem for finding a new tracking portfolio as
 	
-	% \begin{figure}[h!]
-		%     \centering
-		%     % \includegraphics[width=0.8\textwidth]{your_graph_file.png}
-		%     \caption{Cumulative Returns of BH/HF Portfolio}
-		%     \label{fig:bh_returns}
-		% \end{figure}
+	$$
+	\min_{\vec{x}} \epsilon_{MAX}(\vec{x})
+	$$
+	subject to:
+	$$
+	\sum_{i=1}^N \delta(x_i) \leq K
+	$$
+	$$
+	\sum_{i=1}^N \beta_{\sigma}^{+}(x_i) \leq 0
+	$$
+	$$
+	\sum_{i=1}^N x_i + \sum_{i=1}^N a_i |x_i - x_i^0| + A\sum_{i=1}^N \delta(|x_i - x_i^0|) \leq C
+	$$
+	$$
+	\sum_{i=1}^N a_i |x_i - x_i^0| + A\sum_{i=1}^N \delta(|x_i - x_i^0|) \leq \gamma C
+	$$
+	$$
+	x_i \geq 0, \quad i=1, \ldots, I
+	$$
 	
-	\subsection{Index Tracking Results}
-	% Insert tables and graphs here
-	% \begin{figure}[h!]
-		%     \centering
-		%     % \includegraphics[width=0.8\textwidth]{tracking_graph.png}
-		%     \caption{Target Portfolio vs. Replicating Portfolio Returns}
-		%     \label{fig:tracking_returns}
-		% \end{figure}
+	by considering a mixed-integer linear programming (MIP) formulation of the previous equations, we have that this is equivalent to 
+	$$
+	\min_{y,\vec{x},\vec{v},\vec{w},\vec{z}} y
+	$$
+	subject to:
+	$$
+	y \geq \sum_{i=1}^N \theta_{ti}x_i - \theta_{t0}, \quad t=1,\ldots,T
+	$$
+	$$
+	y \geq -\left(\sum_{i=1}^N \theta_{ti}x_i - \theta_{t0}\right), \quad t=1,\ldots,T
+	$$
+	$$
+	\sum_{i=1}^N v_i \leq K
+	$$
+	$$
+	l_i v_i \leq x_i \leq u_i v_i, \quad i=1,\ldots,N
+	$$
+	$$
+	z_i \geq x_i - x_i^0, \quad i=1,\ldots,N
+	$$
+	$$
+	z_i \geq -(x_i - x_i^0), \quad i=1,\ldots,N
+	$$
+	$$
+	z_i \leq Uw_i, \quad i=1,\ldots,N
+	$$
+	$$
+	\sum_{i=1}^N x_i + \sum_{i=1}^N a_i z_i + A\sum_{i=1}^N w_i \leq C
+	$$
+	$$
+	\sum_{i=1}^N a_i z_i + A\sum_{i=1}^N w_i \leq \gamma C
+	$$
+	$$
+	v_i \in \{0,1\}, \quad i=1,\ldots,N
+	$$
+	$$
+	w_i \in \{0,1\}, \quad i=1,\ldots,N
+	$$
+	$$
+	x_i \geq 0, \quad i=1,\ldots,N
+	$$
 	
-	% ================================================
-	% 4. CONCLUSION
-	% ================================================
+	Now we proceed to input the data to the PSG solver and run the optimization in R, when doing this we obtain the following tracking portfolio. 
+	
+	We use the following constraints and parameters:
+	
+	\begin{itemize}
+		\item Timeframe of analysis: 2020-09-15 to 2025-09-11
+		\item Cardinality constraints: $K=15$
+		\item Normalization $\gamma = 0.015$
+		\item Buy-in constraint (min position allowed) $=\text{\$15,000}$
+		\item new tracking portfolio value $+$ transaction cost $\leq$ \$1,000,000 
+		\item We assume the transaction costs are 1.5\% the maximum value of the portfolio
+		\item Box constraints: We don't allow shorts and one position can't exceed 40\% of the maximum budget for the portfolio. ``Box: $\geq$ 0, $\leq$ 400,000''
+	\end{itemize}
+	
+	After running the optimization process in PSG we obtain the following message:
+	
+	\begin{verbatim}
+		Solution is optimal
+		Calculating resulting outputs. Writing solution.
+		Objective: objective = 0.00000000000 [0.00000000000]
+		Solver has normally finished. Solution was saved.
+		Problem: problem_1, solution_status = optimal
+		Timing: data_loading_time = 0.18, preprocessing_time = 0.01, solving_time = 0.02
+		Variables: optimal_point = point_problem_1
+		Objective: objective = 0.00000000000 [0.00000000000]
+		Constraint: constraint_1 =  1.000000000000E+01 [-5.000000000000E+00]
+		Constraint: constraint_2 =  0.000000000000E+00 [ 0.000000000000E+00]
+		Constraint: constraint_3 =  4.593300458190E+05 [-5.406699541810E+05]
+		Constraint: constraint_4 =  1.500000000000E+04 [ 0.000000000000E+00]
+		Constraint: constraint_5 = -1.605348484723E+02 [-1.605348484723E+02]
+		Function: max_risk(matrix_inmmax) =  0.000000000000E+00
+		Function: cardn_pos(1.E-02,matrix_ksi) =  1.000000000000E+01
+		Function: buyin_pos(1.E-02,matrix_ksibuy) =  0.000000000000E+00
+		Function: linear(matrix_ksi) =  4.443300458190E+05
+		Function: variable(trcost) =  1.500000000000E+04
+		Function: polynom_abs(matrix_ksipol) =  1.383946515153E+06
+		Function: cardn_pos(1.E-02,matrix_ksipol) =  0.000000000000E+00
+		Function: cardn_neg(1.E-02,matrix_ksipol) =  1.000000000000E+01
+		OK. Solver Finished
+	\end{verbatim}
+	
+	Finally, we can see in Figure \ref{im:portfolio_comparison} the tracking portfolio compared to our initial portfolio. 
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=0.95\linewidth]{portfolio_comparison.png}
+		\caption{Index tracking results}
+		\label{im:portfolio_comparison}
+	\end{figure} 
+	
 	\section{Conclusion}
-	\subsection{Summary of Findings}
-	\subsection{Model Limitations}
-	\subsection{Suggestions for Future Work}
 	
-	\newpage
+	The results of the project demonstrate that portfolio performance is highly sensitive to the weighting methodology and the investor persona considered. The Buy \& Hold investor experienced smoother long-horizon returns, where structural choices—such as avoiding concentration risk—played a more influential role than short-term volatility. Conversely, the Hedge Fund persona, with daily P\&L sensitivity, exhibited a strong dependence on volatility regimes, fat-tailed shocks, and short-term deviations in market behavior. This highlights that strategies yielding strong long-term compounding may be far less attractive when assessed under a high-frequency risk lens.
+	
+	The analysis of weighting methods revealed that naïve equal weighting provides broad diversification but underperforms during periods dominated by mega-cap growth stocks. Traditional market-capitalization weighting achieved higher absolute and risk-adjusted returns but suffered from extreme concentration in Apple and Microsoft, making the portfolio highly sensitive to idiosyncratic shocks of a few constituents. The geometrically weighting approach offered a balanced compromise, preserving size hierarchy while preventing excessive overweighting of the largest firms.
+	
+	Finally, the index-tracking optimization produced portfolios capable of closely imitating the target equity portfolio under realistic constraints such as cardinality and long-only weights. Although perfect replication is unattainable without allowing short positions or a large number of constituents, the tracking portfolios achieved relatively low tracking error and stable performance. 
 	
 	% ================================================
 	% 5. APPENDICES
@@ -747,18 +828,18 @@
 	\appendix % Starts the Appendix section
 	\section{Python Code}
 	\label{app:code}
-	% \lstset{language=Python, basicstyle=\footnotesize\ttfamily, breaklines=true}
-	% \lstinputlisting{your_script.py}
-	% Or just paste it in a \verbatim environment if you don't use listings
+	
+	The main code is composed of two Python scrips: one for fetching the yahoo finance API prices and the other with basic utility functions needed to clean the data and optimize the process of computing the performance metrics, time frame selectors, descriptive statistics, etc. And three jupyter notebooks, in which the cleaning and analysis process is being carried out. 
+	
+	Attached you will find the following files:	
 	\begin{verbatim}
-		# Paste your Python code here
-		import yfinance as yf
-		import pandas as pd
-		
-		# ...
+		fetch_prices.py
+		utils.py
+		00_data_collection.ipynb
+		01_data_analysis.ipynb
+		02_hypothetical_personas.ipynb
 	\end{verbatim}
 	
-\newpage 
 \bibliographystyle{plain}
 \begin{thebibliography}{9}
 	
@@ -780,4 +861,3 @@
 \end{thebibliography}
 	
 \end{document}
-% --- DOCUMENT END ---

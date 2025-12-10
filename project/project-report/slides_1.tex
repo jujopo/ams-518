@@ -1,0 +1,655 @@
+\documentclass[12pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+\usepackage{appendixnumberbeamer}
+\usepackage{multirow}
+\usepackage{xcolor}
+
+\graphicspath{{C:/Users/Jujop/Documents/GitHub/ams-518/project/data/images/}, {C:/Users/JUANJO/Documents/GitHub/ams-518/project/data/images}}
+
+
+% ========== THEME SETTINGS ==========
+\usetheme{default}
+\usecolortheme{default}
+
+% Define soft orange colors
+\definecolor{softorange}{RGB}{255, 218, 185}  % Peach puff
+\definecolor{darkorange}{RGB}{255, 140, 0}    % Dark orange
+\definecolor{cream}{RGB}{255, 250, 240}       % Floral white
+\definecolor{darkgray}{RGB}{64, 64, 64}
+
+% Apply colors
+\setbeamercolor{title}{fg=darkorange}
+\setbeamercolor{frametitle}{fg=darkorange}
+\setbeamercolor{structure}{fg=darkorange}
+\setbeamercolor{normal text}{fg=darkgray}
+\setbeamercolor{block title}{bg=softorange, fg=darkgray}
+\setbeamercolor{block body}{bg=cream}
+\setbeamercolor{alerted text}{fg=darkorange}
+\setbeamercolor{footline}{fg=darkgray}
+
+% Remove navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+% Customize itemize
+\setbeamertemplate{itemize item}{\color{darkorange}$\bullet$}
+\setbeamertemplate{itemize subitem}{\color{softorange}$\circ$}
+
+% Customize frametitle
+\setbeamertemplate{frametitle}{
+	\nointerlineskip
+	\begin{beamercolorbox}[wd=\paperwidth, ht=1.8em, dp=0.6em]{frametitle}
+		\hspace{1em}\insertframetitle
+	\end{beamercolorbox}
+}
+
+% Custom footline
+\setbeamertemplate{footline}{
+	\hspace{1em}
+	\color{darkgray}
+	\scriptsize
+	\insertshorttitle
+	\hfill
+	\insertframenumber/\inserttotalframenumber
+	\hspace{1em}
+	\vspace{0.5em}
+}
+
+% ========== DOCUMENT START ==========
+\title{Equity Performance Analysis: \\ Investor Personas and Index Tracking}
+\author{Juan Pérez Osorio}
+\institute{Department of Applied Mathematics and Statistics \\ Stony Brook University}
+\date{November 2025}
+
+\begin{document}
+	
+	\begin{frame}
+		\titlepage
+		\centering
+		\vspace{1em}
+		\small\color{darkgray}A comprehensive analysis of portfolio construction and performance evaluation
+	\end{frame}
+	
+	\begin{frame}{Outline}
+		\tableofcontents
+	\end{frame}
+	
+	% ========== INTRODUCTION ==========
+	\section{Introduction \& Motivation}
+	
+	\begin{frame}{Project Overview}
+		\textbf{Main Objective:} Analyze equity portfolio performance through multiple lenses:
+		
+		\begin{block}{Key Research Questions}
+			\begin{itemize}
+				\item How do different weighting methodologies affect risk-adjusted returns?
+				\item What are the performance differences between long-term vs. short-term investment horizons?
+				\item Can we effectively replicate a target portfolio using constrained optimization?
+			\end{itemize}
+		\end{block}
+		
+		\vspace{1em}
+		
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\textbf{Two Investor Personas:}
+				\begin{itemize}
+					\item \alert{Buy \& Hold} investor
+					\item \alert{Hedge Fund} investor
+				\end{itemize}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\textbf{Portfolio:} 10 US stocks
+				\begin{itemize}
+					\item Technology: MSFT, AAPL, IBM
+					\item Dividend aristocrats: XOM, WTM, KO, JNJ
+					\item High yield: VZ, KHC, USB
+				\end{itemize}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Theoretical Framework}
+		\begin{block}{Modern Portfolio Theory (MPT)}
+			\begin{itemize}
+				\item Mean-variance optimization framework
+				\item Diversification reduces portfolio risk
+				\item Risk-return tradeoff is central
+			\end{itemize}
+		\end{block}
+		
+		\vspace{1em}
+		
+		\begin{block}{Key Performance Metrics}
+			\begin{columns}[T]
+				\begin{column}{0.33\textwidth}
+					\textbf{Sharpe Ratio}
+					\[
+					S = \frac{E[R_p - R_f]}{\sigma_p}
+					\]
+				\end{column}
+				\begin{column}{0.33\textwidth}
+					\textbf{Value at Risk}
+					\[
+					\text{VaR}_\alpha = -F_X^{-1}(\alpha)
+					\]
+				\end{column}
+				\begin{column}{0.33\textwidth}
+					\textbf{Conditional VaR}
+					\[
+					\text{CVaR}_\alpha = E[-X| -X \geq \text{VaR}]
+					\]
+				\end{column}
+			\end{columns}
+		\end{block}
+	\end{frame}
+	
+	% ========== METHODOLOGY ==========
+	\section{Methodology}
+	
+	\begin{frame}{Persona Models}
+		\begin{columns}[T]
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Buy \& Hold Investor}
+					\textbf{Objective:} Maximize total return over full period
+					\[
+					\text{P\&L}_{\text{BH}} = \text{Value}_E - \text{Value}_S
+					\]
+					\begin{itemize}
+						\item Long-term perspective
+						\item Captures dividends
+						\item Low turnover
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.48\textwidth}
+				\begin{block}{Hedge Fund Investor}
+					\textbf{Objective:} Generate consistent daily alpha
+					\[
+					\text{P\&L}_{\text{HF}}(t) = \text{Value}_t - \text{Value}_{t-1}
+					\]
+					\begin{itemize}
+						\item Daily mark-to-market
+						\item Manages daily volatility
+						\item Higher turnover
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Weighting Methodologies}
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\textbf{Equal Weighting}
+				\[
+				w_i = \frac{1}{N}
+				\]
+				\small\textcolor{darkgray}{Naïve diversification}
+				
+				\vspace{1em}
+				
+				\textbf{Market Cap Weighting}
+				\[
+				w_i = \frac{M_i}{\sum_j M_j}
+				\]
+				\small\textcolor{darkgray}{Standard approach, concentration risk}
+				
+				\vspace{1em}
+				
+				\textbf{Log Market Cap}
+				\[
+				w_i = \frac{\ln(M_i)}{\sum_j \ln(M_j)}
+				\]
+				\small\textcolor{darkgray}{Compresses size differences}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\textbf{Inverse Volatility}
+				\[
+				w_i = \frac{1/\sigma_i}{\sum_j 1/\sigma_j}
+				\]
+				\small\textcolor{darkgray}{Risk parity approach}
+				
+				\vspace{1em}
+				
+				\textbf{Geometric Weighting}
+				\[
+				w_i = \frac{r^{i-1}(1-r)}{1-r^N}
+				\]
+				\small\textcolor{darkgray}{Parameterized concentration}
+				
+				\vspace{1em}
+				
+				\textbf{Benchmark:} S\&P 500
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Data Pipeline}
+		\begin{block}{Data Collection with \texttt{yfinance}}
+			\begin{itemize}
+				\item 10-year historical data (2015-2025)
+				\item Daily frequency for main analysis
+				\item Dividend-adjusted prices
+				\item Automated batch downloads
+			\end{itemize}
+		\end{block}
+		
+		\begin{block}{Processing Steps}
+			\begin{enumerate}
+				\item Data cleaning and validation
+				\item Return calculation (log and simple)
+				\item Missing value handling
+				\item Volatility estimation
+			\end{enumerate}
+		\end{block}
+		
+		\begin{alertblock}{Data Limitations}
+			Yahoo Finance restricts intraday data history (e.g., 1-minute data: only 8 days)
+		\end{alertblock}
+	\end{frame}
+	
+	% ========== BUY & HOLD RESULTS ==========
+	\section{Buy \& Hold Results}
+	
+	\begin{frame}{Benchmark: S\&P 500 Performance}
+		\centering
+		\includegraphics[width=0.9\textwidth]{sp500_wealth.png}
+		
+		\begin{columns}[T]
+			\begin{column}{0.33\textwidth}
+				\centering
+				Total Return: 223.1\%
+			\end{column}
+			\begin{column}{0.33\textwidth}
+				\centering
+				Sharpe Ratio: 0.60
+			\end{column}
+			\begin{column}{0.33\textwidth}
+				\centering
+				Max DD: -33.9\%
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Weight Comparison: Market Cap Concentration}
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\centering
+				\textbf{Market Cap Weights}
+				\begin{table}
+					\footnotesize
+					\begin{tabular}{lr}
+						\toprule
+						Stock & Weight \\
+						\midrule
+						AAPL & 43.1\% \\
+						MSFT & 37.4\% \\
+						IBM & 3.0\% \\
+						XOM & 5.2\% \\
+						WTM & 0.1\% \\
+						\bottomrule
+					\end{tabular}
+				\end{table}
+				\textcolor{darkgray}{Top 2 stocks: 80.5\% of portfolio}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\centering
+				\textbf{Log Market Cap Weights}
+				\begin{table}
+					\footnotesize
+					\begin{tabular}{lr}
+						\toprule
+						Stock & Weight \\
+						\midrule
+						AAPL & 11.1\% \\
+						MSFT & 11.0\% \\
+						IBM & 10.1\% \\
+						XOM & 10.3\% \\
+						WTM & 8.5\% \\
+						\bottomrule
+					\end{tabular}
+				\end{table}
+				\textcolor{darkgray}{More balanced distribution}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Geometric Weighting Analysis}
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\centering
+				\textbf{Weights for $r=0.8$}
+				\begin{table}
+					\footnotesize
+					\begin{tabular}{lr}
+						\toprule
+						Stock & Weight \\
+						\midrule
+						AAPL & 22.4\% \\
+						MSFT & 17.9\% \\
+						IBM & 14.3\% \\
+						XOM & 11.5\% \\
+						WTM & 9.2\% \\
+						KO & 7.3\% \\
+						JNJ & 5.9\% \\
+						\bottomrule
+					\end{tabular}
+				\end{table}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\centering
+				\includegraphics[width=\textwidth]{wealth_geo.png}
+				\small\textcolor{darkgray}{Sharpe Ratio: 0.87}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	\begin{frame}{Geometric Parameter Sensitivity}
+		\centering
+		\includegraphics[width=0.9\textwidth]{multiple_geo.png}
+		
+		\vspace{1em}
+		
+		\begin{tabular}{cccccc}
+			\toprule
+			Parameter $r$ & 0.5 & 0.7 & 0.8 & 0.9 & 1.0 \\
+			\midrule
+			Top weight & 50.0\% & 30.9\% & 22.4\% & 15.4\% & 10.0\% \\
+			Concentration & High & Medium & Balanced & Low & Equal \\
+			\bottomrule
+		\end{tabular}
+	\end{frame}
+	
+	\begin{frame}{Performance Comparison Across Strategies}
+		\centering
+		\includegraphics[width=0.85\textwidth]{comparison_buy_and_hold.png}
+	\end{frame}
+	
+	\begin{frame}{Risk Metrics Comparison}
+		\small
+		\begin{table}
+			\begin{tabular}{lccccccc}
+				\toprule
+				Strategy & Sharpe & Total & Max & VaR & CVaR & VaR & CVaR \\
+				& Ratio & Return & DD & 95\% & 95\% & 99\% & 99\% \\
+				\midrule
+				
+				Equal & 0.65 & 218.4 & 33.9 & 1.4 & 2.3 & 2.7 & 4.2 \\
+				Market Cap & \textbf{1.00} & \textbf{839.0} & 30.3 & 2.2 & 3.3 & 3.7 & 5.3 \\
+				Log Mkt Cap & 0.68 & 234.1 & 33.8 & 1.4 & 2.4 & 2.7 & 4.2 \\
+				
+				Geometric & 0.87 & 401.4 & 33.9 & 1.5 & 2.6 & 3.1 & 4.6 \\
+				Inverse Vol & 0.65 & 230.0 & 34.7 & 1.4 & 2.4 & 2.8 & 4.3 \\
+				S\&P 500 & 0.60 & 223.1 & 33.9 & 1.7 & 2.8 & 3.4 & 4.8 \\
+				\bottomrule
+			\end{tabular}
+			\caption{Risk and performance metrics (2015-2025)}
+		\end{table}
+		
+		\vspace{1em}
+		
+		\begin{block}{Key Insights}
+			\begin{itemize}
+				\item Market cap weighting delivers highest return but is highly concentrated
+				\item Geometric weighting offers best balance of return and diversification
+				\item All strategies outperform benchmark on Sharpe ratio
+			\end{itemize}
+		\end{block}
+	\end{frame}
+	
+	% ========== HEDGE FUND RESULTS ==========
+	\section{Hedge Fund Strategy}
+	
+	\begin{frame}{Cross-Sectional Momentum Strategy}
+		\begin{block}{Enhanced Momentum Signal}
+			\textbf{Residual Momentum:} Isolate stock-specific momentum
+			\[
+			\tilde{r}_{i,t} = r_{i,t} - \hat{\beta}_{i,t} \cdot r_{m,t}
+			\]
+			
+			\textbf{Sector Neutralization:} Rank within GICS sectors
+			\[
+			z_{i,t} = \frac{s_{i,t} - \mu_{\text{sector}(i),t}}{\sigma_{\text{sector}(i),t}}
+			\]
+		\end{block}
+		
+		\begin{block}{Volatility-Scaled Portfolio}
+			\textbf{Inverse Volatility Weighting:}
+			\[
+			w_{i,t}^{+} = \frac{1/\hat{\sigma}_{i,t}}{\sum_{j\in\mathcal{L}_t} 1/\hat{\sigma}_{j,t}}
+			\]
+			
+			\textbf{Weekly Rebalancing:} Capture evolving signals
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Volatility Targeting Framework}
+		\begin{block}{Constant Risk Exposure}
+			Target annualized volatility: $\sigma^* = 10\%$
+			
+			Leverage factor:
+			\[
+			\lambda_t = \frac{\sigma^*}{\hat{\sigma}_{p,t}}
+			\]
+			
+			Bounded: $\tilde{\lambda}_t \in [0.2, 4]$
+			
+			Final return:
+			\[
+			r_{p,t}^{\text{target}} = \tilde{\lambda}_t \times r_{p,t}
+			\]
+		\end{block}
+		
+		\vspace{1em}
+		
+		\begin{block}{Benefits}
+			\begin{itemize}
+				\item Stabilizes risk across market regimes
+				\item Reduces crash exposure during volatility spikes
+				\item Improves Sharpe ratio consistency
+			\end{itemize}
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Hedge Fund Performance Results}
+		\centering
+		\begin{table}
+			\begin{tabular}{lcc}
+				\toprule
+				Metric & Momentum Strategy & S\&P 500 (BH) \\
+				\midrule
+				Annualized Return & \textbf{14.2\%} & 12.8\% \\
+				Annualized Volatility & \textbf{10.0\%} & 18.5\% \\
+				Sharpe Ratio & \textbf{1.42} & 0.69 \\
+				Maximum Drawdown & \textbf{-18.4\%} & -34.1\% \\
+				Calmar Ratio & \textbf{0.77} & 0.38 \\
+				\bottomrule
+			\end{tabular}
+			\caption{Performance comparison (2015-2025)}
+		\end{table}
+		
+		\vspace{2em}
+		
+		\begin{block}{Strategy Superiority}
+			\begin{itemize}
+				\item \textbf{2.1x higher Sharpe ratio} than S\&P 500
+				\item \textbf{46\% smaller maximum drawdown}
+				\item Consistent alpha generation with controlled risk
+			\end{itemize}
+		\end{block}
+	\end{frame}
+	
+	% ========== INDEX TRACKING ==========
+	\section{Index Tracking Model}
+	
+	\begin{frame}{Optimization Problem Formulation}
+		\begin{block}{Objective: Minimize Tracking Error}
+			\[
+			\min_{\vec{x}} \epsilon_{MAX}(\vec{x})
+			\]
+			where $\epsilon_{MAX}$ is maximum absolute deviation
+		\end{block}
+		
+		\begin{block}{Key Constraints}
+			\begin{itemize}
+				\item \textbf{Cardinality:} $\sum_{i=1}^N \delta(x_i) \leq K = 15$
+				\item \textbf{Long-only:} $x_i \geq 0$
+				\item \textbf{Budget:} $\sum x_i + \text{costs} \leq \$1,000,000$
+				\item \textbf{Minimum position:} $\$15,000$
+				\item \textbf{Transaction costs:} 1.5\% of portfolio value
+			\end{itemize}
+		\end{block}
+		
+		\begin{alertblock}{Complexity}
+			Mixed-integer linear programming (MILP) problem solved with PSG solver
+		\end{alertblock}
+	\end{frame}
+	
+	\begin{frame}{Tracking Portfolio Results}
+		\centering
+		\includegraphics[width=0.85\textwidth]{portfolio_comparison.png}
+		
+		\vspace{1em}
+		
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\centering
+				\textbf{Optimization Success}
+				\begin{itemize}
+					\item Optimal solution found
+					\item 10 positions selected
+					\item Zero buy-in violations
+				\end{itemize}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\centering
+				\textbf{Tracking Quality}
+				\begin{itemize}
+					\item Low tracking error
+					\item Portfolio value: \$444,330
+					\item Transaction cost: \$15,000
+				\end{itemize}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+	% ========== CONCLUSION ==========
+	\section{Conclusion \& Implications}
+	
+	\begin{frame}{Key Findings}
+		\begin{block}{Weighting Methodology Matters}
+			\begin{itemize}
+				\item Market cap weighting yields highest returns but extreme concentration
+				\item Geometric weighting ($r=0.8$) offers best risk-adjusted performance
+				\item Equal weighting underperforms in tech-driven bull markets
+			\end{itemize}
+		\end{block}
+		
+		\begin{block}{Persona Performance Divergence}
+			\begin{itemize}
+				\item BH persona: Smooth returns, sensitive to weighting
+				\item HF persona: Daily volatility sensitivity, requires active management
+				\item Enhanced momentum strategy: Superior risk-adjusted returns (Sharpe 1.42)
+			\end{itemize}
+		\end{block}
+		
+		\begin{block}{Index Tracking Feasibility}
+			Constrained optimization can effectively replicate target portfolios with limited holdings
+		\end{block}
+	\end{frame}
+	
+	\begin{frame}{Practical Implications}
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\begin{block}{For Individual Investors}
+					\begin{itemize}
+						\item Consider geometric weighting for balanced exposure
+						\item Long-term holding reduces transaction costs
+						\item Diversify beyond equal weighting
+					\end{itemize}
+				\end{block}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\begin{block}{For Institutional Investors}
+					\begin{itemize}
+						\item Sector-neutral momentum strategies add value
+						\item Volatility targeting improves risk management
+						\index tracking with constraints is computationally feasible
+					\end{itemize}
+				\end{block}
+			\end{column}
+		\end{columns}
+		
+		\vspace{2em}
+		
+		\centering
+		\color{darkorange}\textbf{Portfolio construction choices significantly impact both absolute returns and risk profiles}
+	\end{frame}
+	
+	\begin{frame}{References \& Code}
+		\small
+		\begin{block}{Key References}
+			\begin{itemize}
+				\item Jegadeesh \& Titman (1993) - Momentum returns
+				\item Blitz, Huij \& Martens (2011) - Residual momentum
+				\item Barroso \& Santa-Clara (2015) - Volatility-managed momentum
+				\item Schachter (2025) - Geometric weighting methodology
+			\end{itemize}
+		\end{block}
+		
+		\begin{block}{Code Repository}
+			Python implementation available:
+			\begin{itemize}
+				\item \texttt{fetch\_prices.py} - Data acquisition
+				\item \texttt{utils.py} - Utility functions
+				\item Jupyter notebooks for analysis
+				\item PSG solver for optimization
+			\end{itemize}
+		\end{block}
+		
+		\vspace{1em}
+		
+		\centering
+		\color{darkgray}\textit{Thank you for your attention!}
+	\end{frame}
+	
+	\begin{frame}
+		\centering
+		\vspace{2em}
+		\color{darkorange}{\LARGE Questions?}
+		
+		\vspace{2em}
+		
+		\begin{columns}[T]
+			\begin{column}{0.5\textwidth}
+				\centering
+				\small
+				Juan Pérez Osorio \\
+				Department of Applied Mathematics and Statistics \\
+				Stony Brook University \\
+				\href{mailto:juan.perez@stonybrook.edu}{juan.perez@stonybrook.edu}
+			\end{column}
+			\begin{column}{0.5\textwidth}
+				\centering
+				\small
+				\textbf{Project Repository:} \\
+				\texttt{github.com/username/equity-analysis}
+				
+				\vspace{1em}
+				
+				\textbf{Time Period:} 2015-2025
+				
+				\vspace{1em}
+				
+				\textbf{Last Updated:} December 2025
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+\end{document}

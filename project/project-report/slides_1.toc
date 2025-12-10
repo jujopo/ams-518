@@ -1,0 +1,6 @@
+\beamer@sectionintoc {1}{Introduction \& Motivation}{3}{0}{1}
+\beamer@sectionintoc {2}{Methodology}{5}{0}{2}
+\beamer@sectionintoc {3}{Buy \& Hold Results}{8}{0}{3}
+\beamer@sectionintoc {4}{Hedge Fund Strategy}{14}{0}{4}
+\beamer@sectionintoc {5}{Index Tracking Model}{17}{0}{5}
+\beamer@sectionintoc {6}{Conclusion \& Implications}{19}{0}{6}
