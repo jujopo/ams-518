@@ -238,7 +238,7 @@ def get_historical_market_cap(api_key, symbol, start_date=None, end_date=None):
             print(f"Error fetching data: {e}")
             return None
         
-def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> dict:
+def performance_metrics(weights, returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> tuple:
     """
     Calculates key performance metrics for a given portfolio.
     
@@ -293,9 +293,14 @@ def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate:
     max_drawdown = drawdown.min()
     
     # VaR and CVaR (95% Confidence)
-    confidence_level = 0.05
-    var_95 = np.percentile(portfolio_ret, confidence_level * 100)
+    confidence_level_95 = 0.05
+    var_95 = np.percentile(portfolio_ret, confidence_level_95 * 100)
     cvar_95 = portfolio_ret[portfolio_ret <= var_95].mean()
+
+    # VaR and CVaR (99% Confidence)
+    confidence_level_99 = 0.01
+    var_99 = np.percentile(portfolio_ret, confidence_level_99 * 100)
+    cvar_99 = portfolio_ret[portfolio_ret <= var_99].mean()
 
     return ({
         "wealth": wealth_index,
@@ -305,10 +310,12 @@ def performance_metrics(weights: np.array, returns: pd.DataFrame, daily_rf_rate:
         "max_drawdown": max_drawdown,
         "portfolio_daily_returns": portfolio_ret,
         "var_95": var_95,
-        "cvar_95": cvar_95
+        "cvar_95": cvar_95,
+        "var_99": var_99,
+        "cvar_99": cvar_99
     }, portfolio_rf)
     
-def performance_metrics_index(returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> dict:
+def performance_metrics_index(returns: pd.DataFrame, daily_rf_rate: pd.DataFrame, timeframe) -> tuple:
     """
     Calculates key performance metrics for a given portfolio.
     
@@ -360,9 +367,14 @@ def performance_metrics_index(returns: pd.DataFrame, daily_rf_rate: pd.DataFrame
     max_drawdown = drawdown.min()
     
     # VaR and CVaR (95% Confidence)
-    confidence_level = 0.05
-    var_95 = np.percentile(index_returns, confidence_level * 100)
+    confidence_level_95 = 0.05
+    var_95 = np.percentile(index_returns, confidence_level_95 * 100)
     cvar_95 = index_returns[index_returns <= var_95].mean()
+
+    # VaR and CVaR (99% Confidence)
+    confidence_level_99 = 0.01
+    var_99 = np.percentile(index_returns, confidence_level_99 * 100)
+    cvar_99 = index_returns[index_returns <= var_99].mean()
 
     return ({
         "wealth": wealth_index,
@@ -371,6 +383,8 @@ def performance_metrics_index(returns: pd.DataFrame, daily_rf_rate: pd.DataFrame
         "drawdown": drawdown,
         "max_drawdown": max_drawdown,
         "var_95": var_95,
-        "cvar_95": cvar_95
+        "cvar_95": cvar_95,
+        "var_99": var_99,
+        "cvar_99": cvar_99
     }, portfolio_rf)
     
