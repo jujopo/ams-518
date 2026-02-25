@@ -1,0 +1,122 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\setlist{nosep}
+
+\title{
+	\vspace{-2cm}
+	\textbf{AMS 518 – Fall 2025 Project Review}\\[0.5em]
+	\Large \textbf{``Bivariate Conditional Normal Distribution -- Parameter Calibration''} 
+}
+\author{
+	\textbf{Author:} \\[0.3em]
+	Amos Anderson \\[0.3em]
+	\textbf{Reviewer:} \\[0.3em]
+	Juan Pérez Osorio \\[0.5em]
+	Department of Applied Mathematics and Statistics, Stony Brook University
+}
+\date{December 2025}
+
+\begin{document}
+	\maketitle
+	\hrule
+	\vspace{8pt}
+	
+	\section*{Executive summary}
+	Anderson implements a directional-quantile calibration method for a conditional bivariate Gaussian model whose mean and covariance depend linearly on a scalar factor. The main numerical contribution is a controlled synthetic experiment showing that a full joint grid search over the five unknown parameters can recover the data-generating values; the report documents failed attempts with a PSG-based formulation and a sequential calibration strategy before settling on the grid-search approach. Diagnostics (one-dimensional slices and two-dimensional contours) are used to illustrate identifiability and the shape of the Koenker--Bassett (KB) loss surface. Overall the project is well-focused, technically sound for the synthetic setting, and pedagogically useful as a demonstration of the directional quantile framework. The remainder of this review follows the requested structure and assigns section scores with brief rationale and actionable suggestions.
+	
+	\section{Complexity and clarity of problem / model formulation (0--40 pts)}
+		
+	(Assessment: \textbf{39/40})
+	
+	\textbf{What is formulated?} The report specifies a conditional bivariate normal model
+	\[
+	Y\mid X \sim \mathcal{N}_2\big(\mu(X),\Sigma(X)\big)
+	\]
+	with mean and covariance linearly dependent on a scalar factor \(X\). Unknown parameters are the two mean slopes \(\beta_{11},\beta_{21}\) and the three covariance slopes \(\sigma_{11},\sigma_{12},\sigma_{22}\). The directional quantile functional and the Koenker--Bassett error are carefully defined and used to construct the empirical loss that is minimized.
+	
+	\textbf{Deterministic vs stochastic; stage-setting.} The model is stochastic (conditional Gaussian) but it is a \emph{single-stage} conditional model (no multi-stage dynamics). The report makes this clear: conditioning is on a contemporaneous factor \(X\), not on a decision tree or time-evolving filtration. 
+	
+	\textbf{Measure of loss / risk and constraints.} The objective is the empirical directional KB loss (quantile loss aggregated over directions \(a\), quantile levels \(\alpha\), and observations). Positivity constraints on directional variances are included. The meaning of the performance function (KB loss as a quantile-based discrepancy measure) is explained and motivated via the risk-quadrangle literature. This is appropriate and well argued. It's actually a very smart choice to convert this minimization problem
+	\[
+	\min_{\theta} \int_A \int_{S^1} w(a, \alpha) \, \mathcal{E}_\alpha [L(a, \alpha, X; \theta)] \, da \, d\alpha,
+	\]
+	into the following
+	\[
+	\min_{\theta} \sum_{k=1}^K \sum_{j=1}^J w(a^{(k)}, \alpha_j) \, \mathcal{E}_{\alpha_j} [L(a^{(k)}, \alpha_j, X; \theta)],
+	\]
+	via a discretization over unit directions and quantile levels. 
+	
+	\textbf{Advantages and drawbacks of the formulation.}
+	\begin{itemize}
+		\item \emph{Advantages:} The directional projection reduces a multivariate estimation problem to a collection of scalar quantile problems; closed-form directional quantiles under Gaussianity make the objective explicit; the approach yields interpretable diagnostics (slices/contours).
+		\item \emph{Drawbacks / limitations:} the covariance parameters enter through a square-root scale term, producing a nonlinear dependence that complicates direct convex optimization (PSG) and forces the author to use a brute-force grid search. The current formulation does not report computational cost or scalability metrics.
+	\end{itemize}
+	
+	\textbf{Recommendation to improve this section:} Include a short paragraph on expected scaling (how K, J, and N affect cost) so the reader can judge feasibility for larger problems.
+	
+	\section{Adequacy and correctness of approaches (0--40 pts)}
+	
+	(Assessment: \textbf{38/40})
+	
+	\textbf{Methods used:} The author attempts (i) a direct PSG-based optimization, (ii) a sequential mean/covariance calibration, and (iii) a full joint grid search. These are carefully documented; the PSG and sequential approaches are analyzed and their failings explained, leading to the final grid-search implementation.
+	
+	\textbf{Correctness:} For the synthetic experiment the methods are implemented correctly: the KB-loss is computed as specified, vectorized evaluations are used for efficiency, and diagnostics show the grid-search minimizer coincides with the true parameter vector. Reporting of slice and contour plots supports the identifiability claims. The auxiliary-variable PSG reformulation is mathematically valid but impractical at the sample sizes used; the author correctly recognizes dimensionality and design-matrix issues.
+	
+	\textbf{Adequacy and alternatives:} While the grid search is a defensible and transparent choice for a synthetic verification experiment, its scalability is limited. 
+	
+	\textbf{Recommendation to improve this section:} Add a short experiment comparing the full grid with a coarser-to-finer nested search (or Bayesian optimization) to show how quickly the minimizer is approached; report runtimes and memory footprints. Also, it could be considered what is the effect of choosing other parameters used for generating benchmark data.
+	
+	\section{Presentation style, clarity of graphs and tables (0--20 pts)}
+	(Assessment: \textbf{20/20})
+	
+	\textbf{Strengths:}
+	\begin{itemize}
+		\item The report is well structured (introduction, model, calibration problem, numerical implementation, results, conclusion).
+		\item Figures (one-dimensional slices and two-dimensional contours) are appropriate and effectively communicate the shape of the KB loss surface and identifiability.
+		\item The paper explains very well why PSG failures occurred and the rationale for each method attempted.
+	\end{itemize}
+	
+	\textbf{Weaknesses / suggestions:}
+	\begin{itemize}
+		\item The report omits computational resource reporting (time / memory), which is essential when advocating a grid-search strategy.
+	\end{itemize}
+	
+	\section*{4. Reviewer’s conclusion: positives, negatives and section grades}
+	\textbf{Positive aspects}
+	\begin{itemize}
+		\item This is a solid and pedagogically valuable project that clearly demonstrates the directional-quantile calibration idea.
+		\item Clear and rigorous formulation of the directional quantile calibration objective and consistent notation.
+		\item Thorough diagnostic analysis (slices, contours) that convincingly demonstrates identifiability in the synthetic experiment.
+		\item Honest and useful documentation of failed approaches (PSG, sequential) which provides pedagogical value for others facing similar modelling constraints.
+	\end{itemize}
+	
+	\textbf{Limitations}
+	\begin{itemize}
+		\item Scalability and computational-cost analysis is missing. The use of a dense 9-point-per-parameter grid (59,049 evaluations) may be acceptable for didactic synthetic work but needs justification for larger models.
+		
+	\end{itemize}
+	
+	\bigskip
+	\begin{table}[h!]
+		\centering
+		\begin{tabular}{@{}lcc@{}}
+			\toprule
+			Section & Max points & Awarded \\ \midrule
+			1. Complexity \& clarity of formulation & 40 & \textbf{39} \\
+			2. Adequacy \& correctness of methods & 40 & \textbf{38} \\
+			3. Presentation style, graphs, suggestions & 20 & \textbf{20} \\ \midrule
+			\textbf{Total} & \textbf{100} & \textbf{97} \\ \bottomrule
+		\end{tabular}
+		\caption{Section grades (reviewer).}
+	\end{table}
+	
+	\vfill
+	\noindent\textit{End of review.}
+	
+\end{document}
